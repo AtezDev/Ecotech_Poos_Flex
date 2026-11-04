@@ -1,6 +1,5 @@
 # Clase Proyecto
 
-
 class Proyecto:
     def __init__(self, nombre: str, descripcion: str ):
             self.nombre = nombre
