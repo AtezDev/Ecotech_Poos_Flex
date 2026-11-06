@@ -1,7 +1,7 @@
 # persistencia/empleado_dao.py
 
 from persistencia.conexion import abrir_conexion, obtener_motor
-
+from dominio.empleado import Empleado
 class EmpleadoDAO:
     @staticmethod
     def insertar(empleado):
@@ -12,7 +12,7 @@ class EmpleadoDAO:
         sql = f"""
             INSERT INTO empleado (nombre, correo)
             VALUES ({marcador}, {marcador})
-"""
+        """
         cursor.execute(sql, (empleado.nombre, empleado.correo))
         empleado.id = cursor.lastrowid
         conexion.commit()
