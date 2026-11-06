@@ -12,3 +12,6 @@ git push
 crear entorno y activar:
 py -m venv .venv
 source .venv/S cripts/activate
+
+instalar dependencias externas 
+pip install pymysql python-dotenv
