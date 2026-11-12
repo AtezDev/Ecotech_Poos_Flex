@@ -1,4 +1,5 @@
 from datetime import date
+import sys
 
 from dominio.empleado import Empleado
 from dominio.departamento import Departamento
@@ -21,6 +22,18 @@ def main():
         return
 
     print("Motor:", obtener_motor())
+
+    if len(sys.argv) > 1 and sys.argv[1] not in ("--listar",):
+        print("Uso: python src/main.py [--listar]")
+        return
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--listar":
+        empleados = EmpleadoDAO.listar()
+        if not empleados:
+            print("Todavía no hay empleados registrados.")
+        for empleado in empleados:
+            print(empleado.mostrar_datos())
+        return
 
     departamento = Departamento("Desarrollo", "Javier Ahumada")
     DepartamentoDAO.insertar(departamento)
@@ -47,6 +60,8 @@ def main():
     empleado.asignarAProyecto(proyecto)
     asignacion_guardada = EmpleadoProyectoDAO.asignar(empleado, proyecto)
     print("Asignación Empleado-Proyecto:", asignacion_guardada)
+    print("Proyectos del empleado:", EmpleadoProyectoDAO.listar_por_empleado(empleado.id))
+    print("Empleados del proyecto:", EmpleadoProyectoDAO.listar_por_proyecto(proyecto.id))
 
     registro = RegistroTiempo(date(2026, 11, 10), 3.5, "Diseño del sistema")
     registro.registrarTiempo(registro.fecha, registro.horasTrabajadas,

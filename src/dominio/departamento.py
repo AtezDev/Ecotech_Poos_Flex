@@ -44,7 +44,10 @@ class Departamento:
     def agregar_empleado(self, empleado: Empleado):
         if not isinstance(empleado, Empleado) or empleado in self._empleados:
             return False
+        if empleado.departamento is not None and empleado.departamento is not self:
+            return False
         self._empleados.append(empleado)
+        empleado.departamento = self
         return True
 
     def asignarEmpleado(self, empleado: Empleado):
@@ -55,10 +58,15 @@ class Departamento:
             return False
         if not isinstance(nuevoDepartamento, Departamento):
             return False
-        if not nuevoDepartamento.agregar_empleado(empleado):
+        if nuevoDepartamento is self:
             return False
         self._empleados.remove(empleado)
-        return True
+        empleado.departamento = None
+        if nuevoDepartamento.agregar_empleado(empleado):
+            return True
+        self._empleados.append(empleado)
+        empleado.departamento = self
+        return False
 
     def mostrar_datos(self):
         return f"ID: {self.id} | Departamento: {self.nombre} | Gerente: {self.gerente}"

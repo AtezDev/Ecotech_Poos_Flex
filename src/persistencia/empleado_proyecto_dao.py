@@ -24,3 +24,29 @@ class EmpleadoProyectoDAO:
         conexion.commit()
         conexion.close()
         return True
+
+    @staticmethod
+    def listar_por_empleado(empleado_id):
+        conexion = abrir_conexion()
+        cursor = conexion.cursor()
+        marcador = "?" if obtener_motor() == "sqlite" else "%s"
+        cursor.execute(
+            f"SELECT proyecto_id FROM empleado_proyecto WHERE empleado_id = {marcador} ORDER BY proyecto_id",
+            (empleado_id,)
+        )
+        filas = cursor.fetchall()
+        conexion.close()
+        return [fila[0] for fila in filas]
+
+    @staticmethod
+    def listar_por_proyecto(proyecto_id):
+        conexion = abrir_conexion()
+        cursor = conexion.cursor()
+        marcador = "?" if obtener_motor() == "sqlite" else "%s"
+        cursor.execute(
+            f"SELECT empleado_id FROM empleado_proyecto WHERE proyecto_id = {marcador} ORDER BY empleado_id",
+            (proyecto_id,)
+        )
+        filas = cursor.fetchall()
+        conexion.close()
+        return [fila[0] for fila in filas]

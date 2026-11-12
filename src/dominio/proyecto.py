@@ -3,7 +3,7 @@ from datetime import date
 
 class Proyecto:
     def __init__(self, nombre: str, descripcion: str, fechaInicio: date, id=None):
-        if not isinstance(fechaInicio, date):
+        if not type(fechaInicio) is date:
             raise ValueError("La fecha de inicio debe ser una fecha válida.")
         if not isinstance(nombre, str) or not nombre.strip():
             raise ValueError("El nombre del proyecto es obligatorio.")
@@ -36,7 +36,7 @@ class Proyecto:
         return self.fechaInicio
 
     def cambiarFechaInicio(self, nuevaFecha):
-        if not isinstance(nuevaFecha, date):
+        if not type(nuevaFecha) is date:
             return False
         self.fechaInicio = nuevaFecha
         return True

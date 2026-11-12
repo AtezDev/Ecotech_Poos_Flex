@@ -1,10 +1,10 @@
 # EcoTech Solutions — Programación Orientada a Objetos
 
-Proyecto de clases de INACAP, basado en `docs/Diagrama_Final.drawio` (tres vistas del mismo UML).
+Proyecto de clases de **Analista Programador (INACAP)**. Se utiliza como referencia el UML final de tres vistas ubicado en `docs/audt_diagr/Diagrama_Final.drawio`.
 
-La versión actual implementa las cuatro entidades trabajadas en Python y su persistencia. Conserva el patrón de clases, `main.py`, DAO, SQLite/MySQL, validación de empleados y lectura de datos. El menú, el CRUD completo, los informes y la autenticación corresponden a etapas posteriores.
+Esta carpeta reúne los avances trabajados en clases: objetos, relaciones, atributos, encapsulamiento, validación de nombre/correo, conexión a SQLite/MySQL, `INSERT`, ID autoincremental y consultas `SELECT`. No incluye aún un menú completo, operaciones `UPDATE`/`DELETE`, informes ni autenticación.
 
-## 1. Estructura
+## 1. Archivos del proyecto
 
 ```text
 Ecotech_Poos_Flex/
@@ -24,17 +24,21 @@ Ecotech_Poos_Flex/
 │       ├── registro_tiempo_dao.py
 │       └── empleado_proyecto_dao.py
 ├── docs/
-│   ├── Diagrama_Final.drawio
-│   └── ALCANCE_Y_AUDITORIA.md
+│   └── audt_diagr/
+│       └── Diagrama_Final.drawio
+├── tests/
+│   └── test_ecotech.py
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
 └── Readme.md
 ```
 
-**Ejecutar `src/main.py`, no los DAO individualmente.** Desde la raíz del repositorio, el comando es `python src/main.py`. Así Python encuentra `dominio` y `persistencia` dentro de `src` y no aparece el error `No module named 'persistencia'`.
+Los documentos, capturas y versiones históricas que ya estén en `docs/` deben conservarse. `tests/` contiene verificaciones complementarias, no es una clase de dominio ni un nuevo requisito de la asignatura.
 
-## 2. Instalación en Windows con Git Bash
+## 2. Preparación en Windows con Git Bash
+
+Desde la carpeta del repositorio:
 
 ```bash
 py -m venv .venv
@@ -42,38 +46,39 @@ source .venv/Scripts/activate
 python -m pip install -r requirements.txt
 ```
 
-Crear un archivo `.env` copiando `.env.example`. El archivo `.env` es privado y no debe subirse a GitHub.
+El archivo `requirements.txt` es el **único listado de dependencias externas**:
+
+- `PyMySQL`: conexión con MySQL, por ejemplo usando WampServer.
+- `python-dotenv`: lectura de variables del archivo `.env`.
+
+`sqlite3`, `datetime`, `venv`, `unittest` y `pathlib` forman parte de Python; no necesitan `pip install` por separado.
+
+Crea tu configuración local copiando `.env.example` a `.env` (sin compartir contraseñas). En Git Bash:
 
 ```bash
-python src/main.py
+cp .env.example .env
 ```
 
-- `venv` y `sqlite3`: módulos incluidos en Python; no se instalan con `pip`.
-- `PyMySQL`: permite conectar con MySQL, por ejemplo mediante WampServer.
-- `python-dotenv`: lee los valores del archivo `.env`.
-- `requirements.txt`: contiene las dos dependencias externas.
-- `requeriments.txt`: compatibilidad con la antigua escritura del nombre; utiliza `requirements.txt`.
+El archivo `.env` debe quedar fuera de Git. Si ya tienes uno local con tus credenciales, consérvalo y revisa su motor antes de ejecutar.
 
-## 3. Seleccionar el motor de base de datos
+## 3. Elegir SQLite o MySQL
 
-### SQLite: primera prueba recomendada
+**SQLite**, recomendado para la primera ejecución:
 
 ```dotenv
 DB_ENGINE=sqlite
 DB_NAME=ecotech_practica.db
 ```
 
-Se crea un archivo `.db` local en la raíz del proyecto. Se activan claves foráneas con `PRAGMA foreign_keys = ON`. Los archivos `.db` no se suben a Git.
+El programa crea un archivo SQLite en la raíz y activa `PRAGMA foreign_keys = ON` en cada conexión.
 
-### MySQL: WampServer, Workbench o phpMyAdmin
-
-Primero, crear **otra base de datos** en phpMyAdmin o MySQL Workbench:
+**MySQL** (WampServer, MySQL Workbench o phpMyAdmin): crea una **base de prueba nueva** en MySQL:
 
 ```sql
 CREATE DATABASE ecotech_practica CHARACTER SET utf8mb4;
 ```
 
-Configurar el archivo `.env` local:
+Configura `.env` (adaptando usuario, contraseña y puerto según tu equipo):
 
 ```dotenv
 DB_ENGINE=mysql
@@ -84,85 +89,90 @@ DB_USER=root
 DB_PASSWORD=
 ```
 
-Modificar usuario, puerto y contraseña según tu instalación. WampServer debe tener iniciado MySQL. El código Python no cambia: `conexion.py` selecciona el motor usando `DB_ENGINE`. El mismo `main.py` funciona en ambos entornos, con los distintos marcadores SQL: `?` en SQLite y `%s` con PyMySQL.
+La conexión utiliza `sqlite3` o PyMySQL según `DB_ENGINE`. Los DAO emplean `?` con SQLite y `%s` con PyMySQL. Las tablas MySQL utilizan `InnoDB` para las claves foráneas.
 
-**No apuntar inicialmente a la base `ecotech` antigua:** contiene empleados con las columnas `id`, `nombre` y `correo`, mientras el UML exige más campos. `crear_tablas()` detecta ese esquema antiguo, informa qué columnas faltan y se detiene **antes de realizar cambios**. `CREATE TABLE IF NOT EXISTS` no migra tablas antiguas. Respalda la base antigua antes de planificar una migración.
+**No utilices directamente la base histórica `ecotech`**: contiene la primera tabla de empleados con solo `id`, `nombre` y `correo`. El nuevo modelo necesita más columnas. `crear_tablas()` revisa columnas esenciales de las tablas existentes y rechaza esquemas incompatibles, pero no realiza migraciones ni comprueba todos los índices de una base antigua.
 
-## 4. Clases de dominio (UML)
+## 4. Clases y UML
 
-| Archivo | Responsabilidad |
+| Archivo | Qué representa |
 |---|---|
-| `empleado.py` | ID, nombre, dirección, teléfono, correo, fecha de inicio de contrato y salario. Valida nombre/correo; usa `@property`, setters y getters. Mantiene proyectos asociados en memoria. |
-| `departamento.py` | Nombre y gerente. Administra una lista de empleados y las operaciones básicas de asignación y reasignación en memoria. |
-| `proyecto.py` | Nombre, descripción y fecha de inicio (`datetime.date`); métodos de consulta y cambio. |
-| `registro_tiempo.py` | Fecha, horas, descripción de tarea y referencias a Empleado y Proyecto. |
+| `empleado.py` | ID, nombre, dirección, teléfono, correo, fecha de inicio de contrato y salario; nombre y correo se validan con propiedades (`@property` y setter). |
+| `departamento.py` | Nombre, gerente y colección de empleados. Asignación/reasignación básica de objetos. |
+| `proyecto.py` | Nombre, descripción y fecha de inicio (`date`). |
+| `registro_tiempo.py` | Fecha, horas, descripción de tarea y referencias a empleado y proyecto. |
 
-El `id` de las entidades es un identificador generado por la base de datos. En el UML de Empleado aparece como `idEmpleado`; en el código se usa `id` para conservar la sintaxis del laboratorio y `obtenerIdEmpleado()` para consultarlo. `fechaInicioContrato` sí está incorporada y se almacena también en la tabla.
+El atributo `id` de Empleado corresponde al `idEmpleado` del UML: se inicializa sin ID (`None`), y el DAO asigna el ID generado por la base. `obtenerIdEmpleado()` permite consultarlo. La validación de nombre y correo usa `strip()`, longitudes y `ValueError` tal como indica el material de lectura de datos. Salario no negativo, horas positivas y fechas de tipo `date` son reglas de implementación que deben justificarse con el UML y confirmarse si el docente define límites distintos.
+
+Las siete clases del UML incluyen además `Informe`, `CuentaUsuario` y `ControlAcceso`, todavía **no implementadas** en esta etapa. Algunos métodos completos de gestión (crear/modificar/eliminar) aparecen en UML pero permanecen para clases posteriores. Cambiar un atributo Python no modifica automáticamente su fila en SQL.
 
 ## 5. Persistencia y DAO
 
-| Archivo | Operación actual | Qué realiza |
-|---|---|---|
-| `conexion.py` | `obtener_motor()`, `abrir_conexion()` | Conecta a SQLite o MySQL según `.env`. |
-| `creacion_bd.py` | `crear_tablas()` | Crea cinco tablas con claves primarias y foráneas. |
-| `empleado_dao.py` | `insertar()`, `listar()`, `buscar_por_id()` | Inserta al empleado y recupera registros como objetos; `listar()` usa `fetchall()`, la búsqueda usa `fetchone()`. |
-| `departamento_dao.py` | `insertar()` | Guarda departamento y asigna su ID. |
-| `proyecto_dao.py` | `insertar()` | Guarda proyecto y fecha de inicio. |
-| `empleado_proyecto_dao.py` | `asignar()` | Guarda la relación N:M; no repite una misma pareja. |
-| `registro_tiempo_dao.py` | `insertar()` | Guarda horas solo si el empleado está asignado al proyecto. |
+| Archivo | Operaciones disponibles |
+|---|---|
+| `conexion.py` | `obtener_motor()`, `abrir_conexion()` |
+| `creacion_bd.py` | `crear_tablas()` |
+| `empleado_dao.py` | `insertar()`, `listar()`, `buscar_por_id()` |
+| `departamento_dao.py` | `insertar()` |
+| `proyecto_dao.py` | `insertar()` |
+| `empleado_proyecto_dao.py` | `asignar()`, `listar_por_empleado()`, `listar_por_proyecto()` |
+| `registro_tiempo_dao.py` | `insertar()` |
 
-Patrón aprendido: `abrir_conexion()`, `cursor()`, `execute()` con parámetros, `cursor.lastrowid`, `commit()` y `close()`. Los valores se pasan por separado a `execute()`.
+`INSERT` guarda filas; `SELECT` recupera datos. `cursor.execute(sql, parametros)` separa la instrucción SQL de sus valores. `cursor.lastrowid` obtiene el ID generado por una inserción, `commit()` confirma la transacción y `close()` cierra la conexión. `fetchall()` obtiene todas las filas de una consulta; `fetchone()` una sola (o `None` si no hay resultado). `listar()` devuelve una lista de objetos `Empleado` o `[]` si está vacía.
 
-### Multiplicidad muchos a muchos
+### Relación entre Empleado y Proyecto
 
-El UML permite que un empleado participe en varios proyectos y que un proyecto tenga varios empleados. Se representa con:
+El UML indica multiplicidad N:M: un empleado participa en varios proyectos y un proyecto tiene varios empleados. La tabla `empleado_proyecto` guarda cada par `(empleado_id, proyecto_id)` con clave primaria compuesta y claves foráneas. La tabla puente no elimina la multiplicidad: **la representa en SQL**. `EmpleadoProyectoDAO.asignar()` registra esa relación y evita duplicados; las consultas permiten verificar ambos sentidos. `RegistroTiempo` se guarda solo para una pareja previamente registrada en esa tabla, reforzada con una FK compuesta.
 
-```text
-empleado (1) ── (N) empleado_proyecto (N) ── (1) proyecto
+## 6. Cómo ejecutar
+
+El programa principal es `src/main.py`, **no los archivos DAO de forma individual**. Desde la raíz del repositorio:
+
+```bash
+python src/main.py
 ```
 
-`empleado_proyecto` tiene `empleado_id`, `proyecto_id` y clave primaria compuesta. `RegistroTiempo` se vincula a una asignación existente mediante una clave foránea compuesta. Esta tabla puente es una adaptación mínima necesaria para persistir la relación del UML; no es una octava clase de dominio.
+El modo normal crea las tablas y ejecuta una demostración completa con un departamento, un proyecto, un empleado, su participación y un registro de tiempo. **Cada ejecución normal agrega nuevos registros de demostración**.
 
-## 6. Qué demuestra main.py
+Para consultar empleados sin añadir registros nuevos:
 
-`python src/main.py`:
+```bash
+python src/main.py --listar
+```
 
-1. Prepara el esquema según el motor.
-2. Crea y guarda un Departamento y un Proyecto.
-3. Crea y guarda un Empleado con todos sus atributos y muestra el ID antes (`None`) y después.
-4. Guarda su asignación al Proyecto en la tabla puente.
-5. Registra horas asociadas al mismo empleado y proyecto.
-6. Recupera el listado de empleados con `EmpleadoDAO.listar()`.
-7. Prueba un ID existente y uno inexistente mediante `buscar_por_id()`.
-8. Demuestra dos rechazos de datos con el `try/except ValueError` enseñado en la clase de validación.
+Para revisar sintaxis y ejecutar pruebas SQLite temporales (opcionales):
 
-**Cada ejecución de `main.py` agrega nuevos registros de demostración.** Para ver registros anteriores sin agregar otros, consulta la base con phpMyAdmin/Workbench o SQLite. En las pruebas de clase se puede verificar también reiniciando Python y volviendo a ejecutar una consulta DAO.
+```bash
+python -m compileall -q src
+python -m unittest discover -s tests -v
+```
 
-## 7. Git Bash: subir los avances
+Estas pruebas no dependen de WampServer y no sustituyen la ejecución real con MySQL en tu computador. Cuando el docente indique el avance correspondiente, añadiremos las funciones de actualización, eliminación, menú y manejo general de errores de conexión.
 
-Desde la carpeta raíz del repositorio:
+## 7. Git Bash y GitHub
 
 ```bash
 git status
 git add .
 git status
-git commit -m "Avance EcoTech: validaciones, consultas y relaciones UML"
+git commit -m "Avance EcoTech POO - clases y persistencia"
 git push
 ```
 
-`git push` utiliza el remoto/rama de seguimiento configurado. `origin` es el nombre habitual del remoto y `main` es el nombre de una rama; no son rutas de carpetas.
+`git push` utiliza la rama de seguimiento configurada. `origin` es el nombre convencional del repositorio remoto, no una carpeta local.
 
-Verificar que el archivo privado está excluido:
+Verifica los archivos privados antes de subir:
 
 ```bash
 git check-ignore -v .env
 git ls-files .env
+git diff --cached --stat
 ```
 
-El segundo comando no debería mostrar el archivo. Si `.env` ya fue rastreado anteriormente, debes retirarlo del índice y reemplazar las credenciales que pudieron quedar expuestas.
+`git ls-files .env` debe devolver vacío; nunca subas contraseñas. Conserva los archivos anteriores en `docs/` y tu historial de `.git`.
 
-## 8. Próximos contenidos
+## 8. Estado del avance
 
-Quedan pendientes el menú, actualizar/eliminar, manejo general de errores de BD y la implementación funcional de `Informe`, `CuentaUsuario` y `ControlAcceso`. Estas tres clases están modeladas en el UML final, pero todavía no se presentan como implementadas. La clase actual sí incluye `try/except ValueError` en la consola para mostrar un error de validación.
+Implementados y comprobados en SQLite: clases principales, validaciones de nombre/correo, `INSERT`, `listar()`, `buscar_por_id()`, claves foráneas, relación N:M y registro de tiempo con asignación.
 
-Consulta `docs/ALCANCE_Y_AUDITORIA.md` para la correspondencia entre los materiales del profesor y las decisiones de implementación.
+Pendientes de probar en **MySQL/WampServer**: conexión real, permisos, creación de cinco tablas, integridad referencial y consultas desde tu computadora. El programa no debe presentarse como probado en MySQL hasta ejecutar esas pruebas.

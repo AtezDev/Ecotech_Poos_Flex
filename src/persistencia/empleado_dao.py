@@ -6,6 +6,8 @@ from persistencia.conexion import abrir_conexion, obtener_motor
 class EmpleadoDAO:
     @staticmethod
     def insertar(empleado, departamento=None):
+        if empleado.id is not None:
+            raise ValueError("Este objeto ya tiene un ID de base de datos.")
         conexion = abrir_conexion()
         cursor = conexion.cursor()
         marcador = "?" if obtener_motor() == "sqlite" else "%s"
@@ -20,8 +22,9 @@ class EmpleadoDAO:
                    empleado.correoElectronico, empleado.fechaInicioContrato.isoformat(),
                    empleado.salario, departamento_id)
         cursor.execute(sql, valores)
-        empleado.id = cursor.lastrowid
+        nuevo_id = cursor.lastrowid
         conexion.commit()
+        empleado.id = nuevo_id
         conexion.close()
         return empleado
 

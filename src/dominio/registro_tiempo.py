@@ -1,10 +1,12 @@
 from datetime import date
+from dominio.empleado import Empleado
+from dominio.proyecto import Proyecto
 
 
 class RegistroTiempo:
     def __init__(self, fecha: date, horasTrabajadas: float,
                  descripcionTarea: str, id=None):
-        if not isinstance(fecha, date):
+        if not type(fecha) is date:
             raise ValueError("La fecha debe ser una fecha válida.")
         if not self.validarHoras(horasTrabajadas):
             raise ValueError("Las horas deben ser mayores que cero.")
@@ -27,7 +29,7 @@ class RegistroTiempo:
         return self.fecha
 
     def cambiarFecha(self, nuevaFecha):
-        if not isinstance(nuevaFecha, date):
+        if not type(nuevaFecha) is date:
             return False
         self.fecha = nuevaFecha
         return True
@@ -52,11 +54,11 @@ class RegistroTiempo:
 
     def registrarTiempo(self, fecha, horasTrabajadas, descripcionTarea,
                         empleado, proyecto):
-        if not isinstance(fecha, date) or not self.validarHoras(horasTrabajadas):
+        if not type(fecha) is date or not self.validarHoras(horasTrabajadas):
             return False
         if not isinstance(descripcionTarea, str) or not descripcionTarea.strip():
             return False
-        if empleado is None or proyecto is None:
+        if not isinstance(empleado, Empleado) or not isinstance(proyecto, Proyecto):
             return False
         self.fecha = fecha
         self.horasTrabajadas = float(horasTrabajadas)

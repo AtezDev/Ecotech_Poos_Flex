@@ -1,4 +1,6 @@
 from datetime import date
+from math import isfinite
+from dominio.proyecto import Proyecto
 
 
 class Empleado:
@@ -10,17 +12,23 @@ class Empleado:
     def __init__(self, nombre: str, direccion: str, telefono: str,
                  correoElectronico: str, fechaInicioContrato: date,
                  salario: float, id=None):
+        self._id = None
         self.id = id
         self.nombre = nombre
-        self.direccion = direccion
-        self.telefono = telefono
+        if not isinstance(direccion, str) or not direccion.strip():
+            raise ValueError("La dirección es obligatoria.")
+        if not isinstance(telefono, str) or not telefono.strip():
+            raise ValueError("El teléfono es obligatorio.")
+        self.direccion = direccion.strip()
+        self.telefono = telefono.strip()
         self.correoElectronico = correoElectronico
-        if not isinstance(fechaInicioContrato, date):
+        if type(fechaInicioContrato) is not date:
             raise ValueError("La fecha de contrato debe ser una fecha válida.")
         self.fechaInicioContrato = fechaInicioContrato
         if not self.validarSalario(salario):
             raise ValueError("El salario debe ser un número mayor o igual a cero.")
         self.salario = float(salario)
+        self.departamento = None
         self._proyectos = []
 
     @staticmethod
@@ -55,7 +63,19 @@ class Empleado:
     def validarSalario(salario):
         return (isinstance(salario, (int, float))
                 and not isinstance(salario, bool)
-                and salario >= 0)
+                and isfinite(salario) and salario >= 0)
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, valor):
+        if self._id is not None and valor != self._id:
+            raise ValueError("No se puede modificar el ID de un empleado guardado.")
+        if valor is not None and (not isinstance(valor, int) or isinstance(valor, bool) or valor <= 0):
+            raise ValueError("El ID debe ser un entero positivo.")
+        self._id = valor
 
     @property
     def nombre(self):
@@ -144,7 +164,7 @@ class Empleado:
             return False
         if not isinstance(telefono, str) or not telefono.strip():
             return False
-        if not isinstance(fechaInicioContrato, date) or not self.validarSalario(salario):
+        if type(fechaInicioContrato) is not date or not self.validarSalario(salario):
             return False
         self.nombre = nombre
         self.direccion = direccion.strip()
@@ -155,7 +175,7 @@ class Empleado:
         return True
 
     def asignarAProyecto(self, proyecto):
-        if proyecto in self._proyectos:
+        if not isinstance(proyecto, Proyecto) or proyecto in self._proyectos:
             return False
         self._proyectos.append(proyecto)
         return True

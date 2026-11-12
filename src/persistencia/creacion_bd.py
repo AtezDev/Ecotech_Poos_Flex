@@ -6,30 +6,38 @@ def crear_tablas():
     cursor = conexion.cursor()
     motor = obtener_motor()
 
-    if motor == "sqlite":
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='empleado'")
-        if cursor.fetchone():
-            cursor.execute("PRAGMA table_info(empleado)")
-            columnas = {fila[1] for fila in cursor.fetchall()}
-        else:
-            columnas = None
-    else:
-        cursor.execute("SHOW TABLES LIKE 'empleado'")
-        if cursor.fetchone():
-            cursor.execute("SHOW COLUMNS FROM empleado")
-            columnas = {fila[0] for fila in cursor.fetchall()}
-        else:
-            columnas = None
+    columnas_requeridas = {
+        "departamento": {"id", "nombre", "gerente"},
+        "proyecto": {"id", "nombre", "descripcion", "fecha_inicio"},
+        "empleado": {"id", "nombre", "direccion", "telefono", "correo",
+                     "fecha_inicio_contrato", "salario", "departamento_id"},
+        "empleado_proyecto": {"empleado_id", "proyecto_id"},
+        "registro_tiempo": {"id", "fecha", "horas_trabajadas", "descripcion_tarea",
+                            "empleado_id", "proyecto_id"}
+    }
+    if motor == "mysql":
+        cursor.execute("SHOW TABLES")
+        tablas_existentes = {fila[0] for fila in cursor.fetchall()}
 
-    necesarias = {"id", "nombre", "direccion", "telefono", "correo",
-                  "fecha_inicio_contrato", "salario", "departamento_id"}
-    if columnas is not None and not necesarias.issubset(columnas):
-        conexion.close()
-        faltantes = ", ".join(sorted(necesarias - columnas))
-        raise ValueError(
-            f"La tabla empleado tiene el esquema antiguo. Faltan: {faltantes}. "
-            "No se modificaron tablas; usa una base de pruebas nueva."
-        )
+    for tabla, necesarias in columnas_requeridas.items():
+        if motor == "sqlite":
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (tabla,))
+            existe = cursor.fetchone() is not None
+            if existe:
+                cursor.execute(f"PRAGMA table_info({tabla})")
+                columnas = {fila[1] for fila in cursor.fetchall()}
+        else:
+            existe = tabla in tablas_existentes
+            if existe:
+                cursor.execute(f"SHOW COLUMNS FROM {tabla}")
+                columnas = {fila[0] for fila in cursor.fetchall()}
+        if existe and not necesarias.issubset(columnas):
+            conexion.close()
+            faltantes = ", ".join(sorted(necesarias - columnas))
+            raise ValueError(
+                f"La tabla {tabla} tiene un esquema incompatible. Faltan: {faltantes}. "
+                "Usa una base nueva o planifica una migración independiente."
+            )
 
     if motor == "sqlite":
         tablas = [

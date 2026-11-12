@@ -9,6 +9,8 @@ class RegistroTiempoDAO:
         if registro.empleado.id is None or registro.proyecto.id is None:
             raise ValueError("Primero debes guardar el empleado y el proyecto.")
 
+        if registro.id is not None:
+            raise ValueError("Este objeto ya tiene un ID de base de datos.")
         conexion = abrir_conexion()
         cursor = conexion.cursor()
         marcador = "?" if obtener_motor() == "sqlite" else "%s"
@@ -26,7 +28,8 @@ class RegistroTiempoDAO:
                    registro.descripcionTarea, registro.empleado.id,
                    registro.proyecto.id)
         cursor.execute(sql, valores)
-        registro.id = cursor.lastrowid
+        nuevo_id = cursor.lastrowid
         conexion.commit()
+        registro.id = nuevo_id
         conexion.close()
         return registro
