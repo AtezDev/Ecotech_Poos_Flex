@@ -12,6 +12,7 @@ from persistencia.departamento_dao import DepartamentoDAO
 from persistencia.proyecto_dao import ProyectoDAO
 from persistencia.registro_tiempo_dao import RegistroTiempoDAO
 from persistencia.empleado_proyecto_dao import EmpleadoProyectoDAO
+from presentacion.menu_empleado import menu_empleados
 
 
 def main():
@@ -20,7 +21,8 @@ def main():
     except ValueError as error:
         print("No se pudo preparar la base:", error)
         return
-
+    menu_empleados()
+"""
     print("Motor:", obtener_motor())
 
     if len(sys.argv) > 1 and sys.argv[1] not in ("--listar",):
@@ -84,7 +86,8 @@ def main():
                      date(2026, 11, 10), 950000.0)
         except ValueError as error:
             print("Dato rechazado:", error)
-
+"""
 
 if __name__ == "__main__":
     main()
+    

@@ -9,9 +9,9 @@ class Empleado:
     MIN_CORREO = 5
     MAX_CORREO = 150
 
-    def __init__(self, nombre: str, direccion: str, telefono: str,
-                 correoElectronico: str, fechaInicioContrato: date,
-                 salario: float, id=None):
+    
+
+    def __init__(self, nombre: str, direccion: str, telefono: str, correoElectronico: str, fechaInicioContrato: date, salario: float, id=None):
         self._id = None
         self.id = id
         self.nombre = nombre
@@ -190,3 +190,4 @@ class Empleado:
         return (f"ID: {self.id} | Nombre: {self.nombre} | Correo: {self.correoElectronico} | "
                 f"Dirección: {self.direccion} | Teléfono: {self.telefono} | "
                 f"Contrato: {self.fechaInicioContrato} | Salario: {self.salario}")
+
