@@ -3,7 +3,8 @@ import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
 
-
+# Clase de persistencia: esta carpeta conoce la base de datos, el dominio no.
+# RAIZ apunta a la carpeta del proyecto aunque ejecutes Python desde otra ubicación.
 RAIZ = Path(__file__).resolve().parents[2]
 load_dotenv(RAIZ / ".env")
 
@@ -14,13 +15,13 @@ def obtener_motor():
 
 def abrir_conexion():
     motor = obtener_motor()
-
     if motor == "sqlite":
         nombre = os.getenv("DB_NAME", "ecotech_practica.db")
-        archivo = Path(nombre)
-        if not archivo.is_absolute():
-            archivo = RAIZ / archivo
-        conexion = sqlite3.connect(archivo)
+        ruta = Path(nombre)
+        if not ruta.is_absolute():
+            ruta = RAIZ / ruta
+        conexion = sqlite3.connect(ruta)
+        # Sin esta línea, SQLite no obliga a cumplir las claves foráneas.
         conexion.execute("PRAGMA foreign_keys = ON")
         return conexion
 
@@ -35,4 +36,4 @@ def abrir_conexion():
             charset="utf8mb4"
         )
 
-    raise ValueError(f"Motor no soportado: {motor}")
+    raise ValueError("Motor de base de datos no reconocido: " + motor)

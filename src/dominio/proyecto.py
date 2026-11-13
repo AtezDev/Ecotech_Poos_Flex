@@ -2,13 +2,14 @@ from datetime import date
 
 
 class Proyecto:
-    def __init__(self, nombre: str, descripcion: str, fechaInicio: date, id=None):
-        if not type(fechaInicio) is date:
-            raise ValueError("La fecha de inicio debe ser una fecha válida.")
+    def __init__(self, nombre, descripcion, fechaInicio, id=None):
+        # Vista UML: nombre, descripción y fecha de inicio de tipo date.
         if not isinstance(nombre, str) or not nombre.strip():
             raise ValueError("El nombre del proyecto es obligatorio.")
         if not isinstance(descripcion, str) or not descripcion.strip():
             raise ValueError("La descripción es obligatoria.")
+        if type(fechaInicio) is not date:
+            raise ValueError("La fecha del proyecto debe ser un date válido.")
         self.id = id
         self.nombre = nombre.strip()
         self.descripcion = descripcion.strip()
@@ -36,11 +37,11 @@ class Proyecto:
         return self.fechaInicio
 
     def cambiarFechaInicio(self, nuevaFecha):
-        if not type(nuevaFecha) is date:
+        if type(nuevaFecha) is not date:
             return False
         self.fechaInicio = nuevaFecha
         return True
 
     def mostrar_datos(self):
         return (f"ID: {self.id} | Proyecto: {self.nombre} | "
-                f"Descripción: {self.descripcion} | Fecha: {self.fechaInicio}")
+                f"Descripción: {self.descripcion} | Inicio: {self.fechaInicio}")

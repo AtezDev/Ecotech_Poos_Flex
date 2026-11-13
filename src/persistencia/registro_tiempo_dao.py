@@ -8,28 +8,29 @@ class RegistroTiempoDAO:
             raise ValueError("El registro necesita un empleado y un proyecto.")
         if registro.empleado.id is None or registro.proyecto.id is None:
             raise ValueError("Primero debes guardar el empleado y el proyecto.")
-
         if registro.id is not None:
-            raise ValueError("Este objeto ya tiene un ID de base de datos.")
-        conexion = abrir_conexion()
-        cursor = conexion.cursor()
-        marcador = "?" if obtener_motor() == "sqlite" else "%s"
-        consulta = ("SELECT empleado_id FROM empleado_proyecto "
-                    f"WHERE empleado_id = {marcador} AND proyecto_id = {marcador}")
-        cursor.execute(consulta, (registro.empleado.id, registro.proyecto.id))
-        if cursor.fetchone() is None:
-            conexion.close()
-            raise ValueError("El empleado no está asignado al proyecto.")
+            raise ValueError("Este registro ya fue guardado.")
 
-        sql = ("INSERT INTO registro_tiempo "
-               "(fecha, horas_trabajadas, descripcion_tarea, empleado_id, proyecto_id) "
-               f"VALUES ({marcador}, {marcador}, {marcador}, {marcador}, {marcador})")
-        valores = (registro.fecha.isoformat(), registro.horasTrabajadas,
-                   registro.descripcionTarea, registro.empleado.id,
-                   registro.proyecto.id)
-        cursor.execute(sql, valores)
-        nuevo_id = cursor.lastrowid
-        conexion.commit()
-        registro.id = nuevo_id
-        conexion.close()
-        return registro
+        conexion = abrir_conexion()
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            consulta = ("SELECT empleado_id FROM empleado_proyecto "
+                        f"WHERE empleado_id = {marcador} AND proyecto_id = {marcador}")
+            cursor.execute(consulta, (registro.empleado.id, registro.proyecto.id))
+            if cursor.fetchone() is None:
+                raise ValueError("El empleado no está asignado al proyecto.")
+
+            sql = ("INSERT INTO registro_tiempo "
+                   "(fecha, horas_trabajadas, descripcion_tarea, empleado_id, proyecto_id) "
+                   f"VALUES ({marcador}, {marcador}, {marcador}, {marcador}, {marcador})")
+            valores = (registro.fecha.isoformat(), registro.horasTrabajadas,
+                       registro.descripcionTarea, registro.empleado.id,
+                       registro.proyecto.id)
+            cursor.execute(sql, valores)
+            nuevo_id = cursor.lastrowid
+            conexion.commit()
+            registro.id = nuevo_id
+            return registro
+        finally:
+            conexion.close()

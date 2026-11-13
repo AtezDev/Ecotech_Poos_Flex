@@ -4,8 +4,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from datetime import date, datetime
 from contextlib import closing
+from datetime import date, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,14 +85,14 @@ class TestEcoTech(unittest.TestCase):
     def test_09_date_types(self):
         for value in ('2026-11-11', datetime(2026,11,11),None):
             with self.subTest(value=value),self.assertRaises(ValueError):
-                Empleado('Ana','La Serena','123','ana@site.cl',value,10)
+                Empleado('Ana','La Serena','+56912345678','ana@site.cl',value,10)
         with self.assertRaises(ValueError): Proyecto('Eco','ok',datetime(2026,11,11))
         with self.assertRaises(ValueError): RegistroTiempo(datetime(2026,11,11),1,'Tarea')
 
     def test_10_salary_validation(self):
         for bad in (-1,'100',True,float('nan'),float('inf'),float('-inf')):
             with self.subTest(bad=bad),self.assertRaises(ValueError):
-                Empleado('Ana','La Serena','123','ana@site.cl',self.fecha,bad)
+                Empleado('Ana','La Serena','+56912345678','ana@site.cl',self.fecha,bad)
         self.assertEqual(self.empleado().salario,950000.0)
 
     def test_11_department_unique(self):
@@ -139,10 +139,11 @@ class TestEcoTech(unittest.TestCase):
         with closing(abrir_conexion()) as conn:
             self.assertEqual(conn.execute('SELECT departamento_id FROM empleado WHERE id=?',(e.id,)).fetchone()[0],d.id)
 
-    def test_16_id_immutable_after_insert(self):
-        e=self.empleado();EmpleadoDAO.insertar(e)
-        with self.assertRaises(ValueError):e.id=e.id+1
-        self.assertEqual(e.obtenerIdEmpleado(),1)
+    def test_16_id_generado_por_bd(self):
+        e = self.empleado()
+        self.assertIsNone(e.id)
+        EmpleadoDAO.insertar(e)
+        self.assertEqual(e.obtenerIdEmpleado(), 1)
 
     def test_17_reinsert_rejected(self):
         e=self.empleado();EmpleadoDAO.insertar(e)
@@ -219,21 +220,18 @@ class TestEcoTech(unittest.TestCase):
 
     def test_27_existing_old_employee_schema_guard(self):
         other=Path(self.tmp.name)/'old.db'
-        with closing(sqlite3.connect(other)) as c:
+        with sqlite3.connect(other) as c:
             c.execute('CREATE TABLE empleado (id INTEGER PRIMARY KEY, nombre TEXT, correo TEXT)')
             c.execute("INSERT INTO empleado VALUES (1,'Juanito','juanito@ecotech.cl')")
-            c.commit()
         os.environ['DB_NAME']=str(other)
         with self.assertRaisesRegex(ValueError,'esquema incompatible'):crear_tablas()
-        with closing(sqlite3.connect(other)) as c:
+        with sqlite3.connect(other) as c:
             self.assertEqual(c.execute('SELECT COUNT(*) FROM empleado').fetchone()[0],1)
             self.assertEqual(c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='proyecto'").fetchone()[0],0)
 
     def test_28_existing_other_table_guard(self):
         other=Path(self.tmp.name)/'old2.db'
-        with closing(sqlite3.connect(other)) as c:
-            c.execute('CREATE TABLE proyecto (id INTEGER PRIMARY KEY,nombre TEXT)')
-            c.commit()
+        with sqlite3.connect(other) as c:c.execute('CREATE TABLE proyecto (id INTEGER PRIMARY KEY,nombre TEXT)')
         os.environ['DB_NAME']=str(other)
         with self.assertRaisesRegex(ValueError,'proyecto tiene un esquema incompatible'):crear_tablas()
 
@@ -244,7 +242,7 @@ class TestEcoTech(unittest.TestCase):
 
     def test_30_run_main_and_read_only(self):
         env=os.environ.copy()
-        a=subprocess.run([sys.executable,str(ROOT/'src/main.py')],cwd=self.tmp.name,env=env,capture_output=True,text=True)
+        a=subprocess.run([sys.executable,str(ROOT/'src/main.py'),'--demo'],cwd=self.tmp.name,env=env,capture_output=True,text=True)
         self.assertEqual(a.returncode,0,a.stderr)
         self.assertIn('Buscar inexistente: None',a.stdout)
         self.assertIn('Proyectos del empleado',a.stdout)
@@ -253,5 +251,129 @@ class TestEcoTech(unittest.TestCase):
         self.assertIn('Ana Torres',b.stdout)
         with closing(abrir_conexion()) as c:self.assertEqual(c.execute('SELECT COUNT(*) FROM empleado').fetchone()[0],1)
 
+
+    def test_31_direccion_validacion(self):
+        self.assertEqual(Empleado.validar_direccion("  La Serena  "), "La Serena")
+        for valor in (" ", "x" * 201, 123):
+            with self.subTest(valor=str(valor)[:10]), self.assertRaises(ValueError):
+                Empleado.validar_direccion(valor)
+
+    def test_32_telefono_validacion(self):
+        self.assertEqual(Empleado.validar_telefono(" +56912345678 "), "+56912345678")
+        for valor in ("", "123", "9x12345678", "+", "++56912345678", "123 456 789", "1234567890123456", 123456789):
+            with self.subTest(valor=valor), self.assertRaises(ValueError):
+                Empleado.validar_telefono(valor)
+
+    def test_33_salario_consola(self):
+        from presentacion.menu_empleado import solicitar_salario
+        self.assertEqual(solicitar_salario("950000"), 950000.0)
+        for valor in ("abc", "-1", "nan", "inf"):
+            with self.subTest(valor=valor), self.assertRaises(ValueError):
+                solicitar_salario(valor)
+
+    def test_34_fecha_consola(self):
+        from presentacion.menu_empleado import solicitar_fecha
+        self.assertEqual(solicitar_fecha("2026-11-12"), date(2026, 11, 12))
+        for valor in ("2026-02-30", "hola", ""):
+            with self.subTest(valor=valor), self.assertRaises(ValueError):
+                solicitar_fecha(valor)
+
+    def test_35_cambio_invalido_conserva_datos(self):
+        e = self.empleado()
+        self.assertFalse(e.cambiarTelefono("hola"))
+        self.assertFalse(e.cambiarDireccion(" "))
+        self.assertFalse(e.cambiarSalario(-20))
+        self.assertEqual((e.telefono, e.direccion, e.salario),
+                         ("+56912345678", "La Serena", 950000.0))
+
+    def test_36_actualizar_correo_dao(self):
+        e = self.empleado()
+        EmpleadoDAO.insertar(e)
+        e.correoElectronico = "nuevo@ecotech.cl"
+        self.assertEqual(EmpleadoDAO.actualizar(e), 1)
+        self.assertEqual(EmpleadoDAO.buscar_por_id(e.id).correoElectronico,
+                         "nuevo@ecotech.cl")
+
+    def test_37_eliminar_sin_relaciones_dao(self):
+        e = self.empleado()
+        EmpleadoDAO.insertar(e)
+        self.assertEqual(EmpleadoDAO.eliminar(e.id), 1)
+        self.assertIsNone(EmpleadoDAO.buscar_por_id(e.id))
+
+    def test_38_relacion_impide_eliminar_dao(self):
+        e = self.empleado()
+        p = self.proyecto()
+        EmpleadoDAO.insertar(e)
+        ProyectoDAO.insertar(p)
+        EmpleadoProyectoDAO.asignar(e, p)
+        with self.assertRaises(sqlite3.IntegrityError):
+            EmpleadoDAO.eliminar(e.id)
+        self.assertIsNotNone(EmpleadoDAO.buscar_por_id(e.id))
+
+    def test_39_menu_reintenta_solo_telefono(self):
+        entrada = "\n".join(["1", "Ana Torres", "La Serena", "abc", "+56912345678",
+                             "ana@ecotech.cl", "2026-11-12", "950000", "0", ""])
+        env = os.environ.copy()
+        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+                                 cwd=self.tmp.name, env=env, input=entrada,
+                                 capture_output=True, text=True)
+        self.assertEqual(proceso.returncode, 0, proceso.stderr)
+        self.assertIn("Teléfono inválido:", proceso.stdout)
+        self.assertEqual(proceso.stdout.count("Nombre: "), 1)
+        self.assertIn("Empleado registrado. ID:", proceso.stdout)
+        self.assertEqual(len(EmpleadoDAO.listar()), 1)
+
+    def test_40_menu_listar_buscar_sin_modificar(self):
+        e = self.empleado()
+        EmpleadoDAO.insertar(e)
+        entrada = f"2\n3\n{e.id}\n0\n"
+        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+                                 cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
+                                 capture_output=True, text=True)
+        self.assertEqual(proceso.returncode, 0, proceso.stderr)
+        self.assertIn("Ana Torres", proceso.stdout)
+        self.assertEqual(len(EmpleadoDAO.listar()), 1)
+
+    def test_41_menu_actualizar_y_cancelar_eliminacion(self):
+        e = self.empleado()
+        EmpleadoDAO.insertar(e)
+        entrada = f"4\n{e.id}\nnuevo@ecotech.cl\n5\n{e.id}\nn\n0\n"
+        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+                                 cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
+                                 capture_output=True, text=True)
+        self.assertEqual(proceso.returncode, 0, proceso.stderr)
+        self.assertIn("Correo actualizado correctamente.", proceso.stdout)
+        self.assertIn("Eliminación cancelada.", proceso.stdout)
+        self.assertEqual(EmpleadoDAO.buscar_por_id(e.id).correoElectronico, "nuevo@ecotech.cl")
+
+
+    def test_42_menu_reintenta_correo_fecha_y_salario(self):
+        entrada = "\n".join(["1", "Ana Torres", "La Serena", "+56912345678",
+                             "ana@", "ana@ecotech.cl", "2026-02-30", "2026-11-12",
+                             "abc", "950000", "0", ""])
+        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+                                 cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
+                                 capture_output=True, text=True)
+        self.assertEqual(proceso.returncode, 0, proceso.stderr)
+        self.assertIn("Correo inválido:", proceso.stdout)
+        self.assertIn("Fecha contrato (AAAA-MM-DD) inválido:", proceso.stdout)
+        self.assertIn("Salario inválido:", proceso.stdout)
+        self.assertEqual(proceso.stdout.count("Nombre: "), 1)
+        self.assertEqual(len(EmpleadoDAO.listar()), 1)
+
+    def test_43_nombre_no_admite_numeros(self):
+        for nombre in ("Ana123", "María!", "Pedro_7"):
+            with self.subTest(nombre=nombre), self.assertRaises(ValueError):
+                self.empleado(nombre=nombre)
+        self.assertEqual(self.empleado(nombre="María José").nombre, "María José")
+        self.assertEqual(self.empleado(nombre="D'Ávila").nombre, "D'Ávila")
+
+    def test_44_salario_decimal_en_consola(self):
+        from presentacion.menu_empleado import solicitar_salario
+        self.assertEqual(solicitar_salario("950000.50"), 950000.5)
+        self.assertEqual(solicitar_salario("950000"), 950000.0)
+        for entrada in ("9a000", "9,500", " "):
+            with self.subTest(entrada=entrada), self.assertRaises(ValueError):
+                solicitar_salario(entrada)
 
 if __name__=='__main__':unittest.main(verbosity=2)

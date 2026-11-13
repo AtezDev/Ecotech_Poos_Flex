@@ -2,7 +2,8 @@ from dominio.empleado import Empleado
 
 
 class Departamento:
-    def __init__(self, nombre: str, gerente: str, id=None):
+    def __init__(self, nombre, gerente, id=None):
+        # Atributos de Departamento según el UML.
         if not self.validarNombre(nombre):
             raise ValueError("El nombre del departamento es obligatorio.")
         if not isinstance(gerente, str) or not gerente.strip():
@@ -10,7 +11,7 @@ class Departamento:
         self.id = id
         self.nombre = nombre.strip()
         self.gerente = gerente.strip()
-        self._empleados: list[Empleado] = []
+        self._empleados = []  # 0..*: varios objetos Empleado.
 
     @staticmethod
     def validarNombre(nombre):
@@ -36,12 +37,14 @@ class Departamento:
 
     @property
     def empleados(self):
+        # Devolvemos una tupla para que no modifiquen la lista interna directamente.
         return tuple(self._empleados)
 
     def cantidad_empleados(self):
         return len(self._empleados)
 
-    def agregar_empleado(self, empleado: Empleado):
+    def agregar_empleado(self, empleado):
+        # Un empleado puede pertenecer como máximo a un Departamento.
         if not isinstance(empleado, Empleado) or empleado in self._empleados:
             return False
         if empleado.departamento is not None and empleado.departamento is not self:
@@ -50,13 +53,11 @@ class Departamento:
         empleado.departamento = self
         return True
 
-    def asignarEmpleado(self, empleado: Empleado):
+    def asignarEmpleado(self, empleado):
         return self.agregar_empleado(empleado)
 
-    def reasignarEmpleado(self, empleado: Empleado, nuevoDepartamento):
-        if empleado not in self._empleados:
-            return False
-        if not isinstance(nuevoDepartamento, Departamento):
+    def reasignarEmpleado(self, empleado, nuevoDepartamento):
+        if empleado not in self._empleados or not isinstance(nuevoDepartamento, Departamento):
             return False
         if nuevoDepartamento is self:
             return False
@@ -64,6 +65,7 @@ class Departamento:
         empleado.departamento = None
         if nuevoDepartamento.agregar_empleado(empleado):
             return True
+        # Si falla el cambio, dejamos al empleado en el departamento original.
         self._empleados.append(empleado)
         empleado.departamento = self
         return False

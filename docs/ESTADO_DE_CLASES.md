@@ -1,13 +1,12 @@
-# Estado del aprendizaje en EcoTech
+# Estado real EcoTech — versión remodelada para estudiar
 
-**Implementado:** cuatro entidades de dominio; relaciones entre Empleado, Departamento y Proyecto; `EmpleadoDAO.insertar`, `listar` y `buscar_por_id`; otros DAO con `insertar`; relación N:M en tabla puente; fecha de contrato y de proyecto; configuración SQLite/MySQL.
-
-**Contenido específico de las diapositivas:** `__init__`, `self`, colecciones, `@property`, setters, `strip`, `isinstance`, `ValueError`, SQL parametrizado, `lastrowid`, `fetchall`, `fetchone`, `None` y demostraciones en consola.
-
-**Adaptaciones al UML:** campos adicionales de Empleado, fecha de Proyecto, referencias en RegistroTiempo, cinco tablas y tabla puente, controles numéricos de salario y horas, lectura de la relación N:M.
-
-**No implementado aún:** tres clases de informes/acceso del UML, menú, actualización/eliminación SQL y manejo global de excepciones. `main.py` incluye únicamente los ejemplos de `try/except ValueError` asociados a validación.
-
-**Base original:** nunca ejecutes esta extensión sobre la base `ecotech` con empleado de tres columnas sin planificar primero una migración. Usa una base nueva para las prácticas.
-
-**Estado de verificación:** pruebas SQLite reproducibles incluidas en `tests/`; ejecución en MySQL/WampServer pendiente de la comprobación local del estudiante.
+- **Guía de diseño:** `audt_diagr/Diagrama_Final.drawio` con 3 vistas (7 clases).
+- **U2 Clase 1:** objetos, `__init__`, `self`, `main`.
+- **U2 Clase 2:** relaciones, multiplicidades, colecciones y encapsulamiento.
+- **U2 SQL/DAO:** SQLite/MySQL, 5 tablas, `INSERT`, ID autogenerado, SQL parametrizado.
+- **FLEX Clase 3:** `@property`, setters, nombre/correo, lista y búsqueda por ID.
+- **FLEX Clase 4:** menú, `while True`, reintentos por campo, `try/except`, UPDATE de correo y DELETE confirmado.
+- **Conservado:** relación Empleado–Proyecto N:M, tabla puente y FK compuesta de RegistroTiempo.
+- **Pendiente:** los comportamientos avanzados del UML y las clases Informe, CuentaUsuario y ControlAcceso, además del CRUD completo de otras entidades.
+- **Pruebas:** SQLite temporal; ejecutar también en Windows y posteriormente en MySQL/WampServer.
+- **Sin cambios en GitHub:** este paquete es una carpeta de estudio independiente.

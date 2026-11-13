@@ -5,17 +5,19 @@ class ProyectoDAO:
     @staticmethod
     def insertar(proyecto):
         if proyecto.id is not None:
-            raise ValueError("Este objeto ya tiene un ID de base de datos.")
+            raise ValueError("Este proyecto ya fue guardado.")
+
         conexion = abrir_conexion()
-        cursor = conexion.cursor()
-        marcador = "?" if obtener_motor() == "sqlite" else "%s"
-        sql = (f"INSERT INTO proyecto (nombre, descripcion, fecha_inicio) "
-               f"VALUES ({marcador}, {marcador}, {marcador})")
-        valores = (proyecto.nombre, proyecto.descripcion,
-                   proyecto.fechaInicio.isoformat())
-        cursor.execute(sql, valores)
-        nuevo_id = cursor.lastrowid
-        conexion.commit()
-        proyecto.id = nuevo_id
-        conexion.close()
-        return proyecto
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            sql = ("INSERT INTO proyecto (nombre, descripcion, fecha_inicio) "
+                   f"VALUES ({marcador}, {marcador}, {marcador})")
+            valores = (proyecto.nombre, proyecto.descripcion, proyecto.fechaInicio.isoformat())
+            cursor.execute(sql, valores)
+            nuevo_id = cursor.lastrowid
+            conexion.commit()
+            proyecto.id = nuevo_id
+            return proyecto
+        finally:
+            conexion.close()

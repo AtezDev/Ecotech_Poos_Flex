@@ -4,14 +4,14 @@ from dominio.proyecto import Proyecto
 
 
 class RegistroTiempo:
-    def __init__(self, fecha: date, horasTrabajadas: float,
-                 descripcionTarea: str, id=None):
-        if not type(fecha) is date:
-            raise ValueError("La fecha debe ser una fecha válida.")
+    def __init__(self, fecha, horasTrabajadas, descripcionTarea, id=None):
+        # El UML exige una fecha, horas y descripción de tarea.
+        if type(fecha) is not date:
+            raise ValueError("La fecha del registro debe ser un date válido.")
         if not self.validarHoras(horasTrabajadas):
             raise ValueError("Las horas deben ser mayores que cero.")
         if not isinstance(descripcionTarea, str) or not descripcionTarea.strip():
-            raise ValueError("La descripción de la tarea es obligatoria.")
+            raise ValueError("La tarea es obligatoria.")
         self.id = id
         self.fecha = fecha
         self.horasTrabajadas = float(horasTrabajadas)
@@ -22,14 +22,13 @@ class RegistroTiempo:
     @staticmethod
     def validarHoras(horas):
         return (isinstance(horas, (int, float))
-                and not isinstance(horas, bool)
-                and 0 < horas)
+                and not isinstance(horas, bool) and 0 < horas < float("inf"))
 
     def obtenerFecha(self):
         return self.fecha
 
     def cambiarFecha(self, nuevaFecha):
-        if not type(nuevaFecha) is date:
+        if type(nuevaFecha) is not date:
             return False
         self.fecha = nuevaFecha
         return True
@@ -54,7 +53,7 @@ class RegistroTiempo:
 
     def registrarTiempo(self, fecha, horasTrabajadas, descripcionTarea,
                         empleado, proyecto):
-        if not type(fecha) is date or not self.validarHoras(horasTrabajadas):
+        if type(fecha) is not date or not self.validarHoras(horasTrabajadas):
             return False
         if not isinstance(descripcionTarea, str) or not descripcionTarea.strip():
             return False
