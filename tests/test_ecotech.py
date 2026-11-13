@@ -220,18 +220,19 @@ class TestEcoTech(unittest.TestCase):
 
     def test_27_existing_old_employee_schema_guard(self):
         other=Path(self.tmp.name)/'old.db'
-        with sqlite3.connect(other) as c:
+        with closing(sqlite3.connect(other)) as c:
             c.execute('CREATE TABLE empleado (id INTEGER PRIMARY KEY, nombre TEXT, correo TEXT)')
             c.execute("INSERT INTO empleado VALUES (1,'Juanito','juanito@ecotech.cl')")
+            c.commit()
         os.environ['DB_NAME']=str(other)
         with self.assertRaisesRegex(ValueError,'esquema incompatible'):crear_tablas()
-        with sqlite3.connect(other) as c:
+        with closing(sqlite3.connect(other)) as c:
             self.assertEqual(c.execute('SELECT COUNT(*) FROM empleado').fetchone()[0],1)
             self.assertEqual(c.execute("SELECT COUNT(*) FROM sqlite_master WHERE name='proyecto'").fetchone()[0],0)
 
     def test_28_existing_other_table_guard(self):
         other=Path(self.tmp.name)/'old2.db'
-        with sqlite3.connect(other) as c:c.execute('CREATE TABLE proyecto (id INTEGER PRIMARY KEY,nombre TEXT)')
+        with closing(sqlite3.connect(other)) as c:c.execute('CREATE TABLE proyecto (id INTEGER PRIMARY KEY,nombre TEXT)')
         os.environ['DB_NAME']=str(other)
         with self.assertRaisesRegex(ValueError,'proyecto tiene un esquema incompatible'):crear_tablas()
 
