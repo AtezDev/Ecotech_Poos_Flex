@@ -3,9 +3,11 @@
 **Proyecto académico de Analista Programador · INACAP · Programación Orientada a Objeto Seguro (TI3V21 FLEX)**  
 **Repositorio:** [AtezDev/Ecotech_Poos_Flex](https://github.com/AtezDev/Ecotech_Poos_Flex)  
 **Guía de diseño:** [`docs/audt_diagr/Diagrama_Final.drawio`](docs/audt_diagr/Diagrama_Final.drawio) — UML definitivo de **tres vistas**.  
-**Alcance documentado:** avances hasta **FLEX Unidades 2–3, Clase 4: «Menú y manejo de excepciones»**, más las implementaciones complementarias necesarias para respetar el UML.
+**Alcance documentado:** avances hasta **FLEX Unidades 2–3, Clase 4: «Menú y manejo de excepciones»**, más las implementaciones complementarias necesarias para respetar el UML y la **ampliación del CRUD a todas las entidades implementadas** (sección 4, «CRUD completo»).
 
-**Estado de GitHub comprobado:** rama `main`, commit `0c46c40` (*Fusion avances EcoTech*, 13 de noviembre de 2026). El estudiante confirmó que las **44 pruebas terminaron en `OK` en Windows**, y que el `push` de la fusión fue exitoso. Este README ampliado se entrega por separado para incorporarlo en un nuevo commit.
+**Estado de GitHub comprobado:** rama `main`, commit `49432e9` (*actualizacion Readme*, 13 de noviembre de 2026). El estudiante confirmó que las **44 pruebas originales terminaron en `OK` en Windows** y que el `push` de la fusión fue exitoso.
+
+**Ampliación del 17 de noviembre de 2026 (CRUD completo):** se agregan actualización de nombre, dirección, teléfono y salario del empleado, CRUD de Departamento, Proyecto y RegistroTiempo, asignación y cambio de proyecto, y un menú principal que reúne todo (`python src/main.py`). En el entorno de revisión (Linux) pasaron **64/64 pruebas en SQLite** (44 originales, con 4 de ellas ajustadas por el nuevo menú principal, + 20 nuevas) y un recorrido completo del CRUD contra **MariaDB 10.11 con PyMySQL** en una base nueva. **No se ha probado todavía en Windows ni en MySQL de WampServer**: ese paso lo debes hacer tú antes del `push` (sección 8).
 
 > **Principio de EcoTech:** el **UML define qué debe tener y hacer el sistema**; las **diapositivas del profesor enseñan cómo implementarlo**. Simplificamos la escritura y la explicación del código, **no** los atributos, operaciones, relaciones ni multiplicidades del diagrama. Es un proyecto de aprendizaje progresivo, no una aplicación empresarial terminada.
 
@@ -88,9 +90,16 @@ Ecotech_Poos_Flex/
 │   │   └── registro_tiempo_dao.py
 │   └── presentacion/                   # Interacción con el usuario
 │       ├── __init__.py
-│       └── menu_empleado.py
+│       ├── menu_empleado.py
+│       ├── menu_comun.py               # Ayudas compartidas: listar, buscar, eliminar, confirmar
+│       ├── menu_departamento.py
+│       ├── menu_proyecto.py
+│       ├── menu_asignacion.py          # Empleado–Proyecto y Empleado–Departamento
+│       ├── menu_registro_tiempo.py
+│       └── menu_principal.py           # Menú principal (lo abre python src/main.py)
 ├── tests/
-│   └── test_ecotech.py                # 44 casos de prueba en la versión documentada
+│   ├── test_ecotech.py                # 44 casos de prueba originales
+│   └── test_crud.py                   # 20 casos nuevos del CRUD completo
 ├── docs/
 │   ├── audt_diagr/
 │   │   ├── Diagrama_Final.drawio       # UML definitivo: 3 vistas
@@ -283,16 +292,127 @@ def solicitar(campo, validador):
 
 **Indentación:** `while True` está dentro de `solicitar`; `try` y `except` están alineados entre sí dentro del ciclo; `return` termina la función cuando el dato es válido. Aquí `validador` recibe **una función**, no un booleano: por ejemplo, `solicitar("Nombre", Empleado.validar_nombre)`.
 
-**Estado real del CRUD en esta versión:**
+**Estado del CRUD de Empleado al cierre de la Clase 4** (la ampliación posterior está en la sección siguiente):
 
 | Operación | Empleado | Observación |
 |---|---|---|
 | **C — Create** | Implementada | `insertar()` guarda y obtiene el ID. |
 | **R — Read** | Implementada | `listar()` y `buscar_por_id()`. |
-| **U — Update** | **Parcial** | Desde el menú se actualiza **solo el correo**, tal como muestra la clase. |
+| **U — Update** | **Parcial en la Clase 4** | En la clase se actualiza **solo el correo**; luego se amplió (ver sección siguiente). |
 | **D — Delete** | Implementada con controles | Se busca el empleado, se pide confirmación y se intenta eliminar por ID. Las FK pueden impedirlo si tiene relaciones. |
 
-**Todavía no está implementado en este paquete:** cambiar desde el menú la dirección, el teléfono, el salario, el nombre o la fecha; crear/listar proyectos desde el menú; asignar proyectos por el menú; CRUD completo de las demás entidades. Ya existen **métodos y DAO parciales** que servirán de base, pero eso no equivale a tener todas esas opciones funcionando.
+**Estado al cierre de la Clase 4:** faltaba cambiar desde el menú la dirección, el teléfono, el salario y el nombre; gestionar proyectos por el menú; asignar proyectos por el menú; y el CRUD de las demás entidades. **Todo eso se resolvió en la ampliación descrita en la sección siguiente.**
+
+
+### FLEX — CRUD completo de todas las entidades (ampliación del 17 de noviembre)
+
+**Qué pedía el proyecto:** si cambia el teléfono, la dirección, el nombre o el salario de un empleado, debe poder actualizarse; los proyectos deben poder registrarse, modificarse y eliminarse; un empleado puede dejar un proyecto y recibir otro; lo mismo para departamentos y registros de tiempo.
+
+**Qué se reutilizó de las clases (no se inventó nada nuevo):** `@staticmethod`, métodos `obtener…/cambiar…` del UML, `solicitar(campo, validador)`, `while True`, `if/elif`, `for … in` con `append`, `try/except/else`, `finally`, SQL parametrizado (`?` en SQLite, `%s` en PyMySQL), `commit()` y `close()`. El patrón de actualizar es el de la diapositiva «Actualizar el correo de un empleado encontrado» de la Clase 4 (buscar → validar → comparar → guardar → comprobar `filas == 1`). Se evitaron a propósito las comprensiones de lista, `lambda`, `getattr/setattr` y pasar métodos de instancia como argumentos, porque no se han visto en clases. **Una excepción:** `cursor.rowcount` (ya usado en tu `EmpleadoDAO.actualizar/eliminar`) no aparece en las diapositivas revisadas; su uso aquí sigue ese precedente de tu código.
+
+**Decisión de estilo:** por ahora el código nuevo **no lleva comentarios**; la explicación está en este README.
+
+#### Qué se agregó, archivo por archivo
+
+| Archivo | Qué hace | Detalle que conviene entender |
+|---|---|---|
+| `persistencia/empleado_dao.py` | `actualizar()` ahora guarda **nombre, dirección, teléfono, correo y salario** con un solo `UPDATE`. | El objeto ya validó los datos con `cambiarNombre()`, `cambiarDireccion()`, etc. El DAO solo guarda lo que el objeto tiene. |
+| `persistencia/departamento_dao.py` | `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()`, `asignar_empleado()`, `quitar_empleado()`, `listar_empleados()`. | `asignar_empleado()` cambia `empleado.departamento_id`; como es una sola columna, un empleado solo puede estar en **un** departamento (multiplicidad 0..1 del UML). Quitarlo es poner `NULL`. |
+| `persistencia/proyecto_dao.py` | `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()`. | La fecha se guarda como texto ISO y se reconstruye con `date.fromisoformat(str(fecha))`, igual que en Empleado. |
+| `persistencia/empleado_proyecto_dao.py` | Se agrega `desasignar(empleado, proyecto)`. | Devuelve `True` si borró la pareja y `False` si no existía. |
+| `persistencia/registro_tiempo_dao.py` | `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()` y `reconstruir()`. | `reconstruir()` arma el objeto y vuelve a cargar su Empleado y su Proyecto con los DAO que ya existían. Solo se actualizan fecha, horas y tarea; empleado y proyecto **no se cambian** (para eso se elimina y se crea otro registro). |
+| `presentacion/menu_empleado.py` | Opciones **6** (dirección), **7** (teléfono), **8** (nombre) y **9** (salario). Las opciones 1 a 5 no cambian. | Una función por dato (`actualizar_direccion()`, etc.), todas con el mismo molde, más `solicitar_id_de()`. |
+| `presentacion/menu_comun.py` | `listar_todo()`, `buscar_uno()`, `eliminar_con_confirmacion()`, `confirmar()`, `validar_texto_obligatorio()`, `validar_horas()`. | Evita repetir el mismo bloque `try/except` en cada menú. |
+| `presentacion/menu_departamento.py`, `menu_proyecto.py`, `menu_registro_tiempo.py` | Un menú CRUD por entidad. | Siguen el molde del menú de empleados: `while True`, opciones con `if/elif`, `0` para volver. |
+| `presentacion/menu_asignacion.py` | Asignar/quitar empleado de proyecto; ver proyectos de un empleado y empleados de un proyecto; asignar/quitar empleado de departamento; ver empleados de un departamento. | Aquí se resuelve «se le asigna otro proyecto»: se quita el anterior y se asigna el nuevo. |
+| `presentacion/menu_principal.py` | Menú principal que enlaza todos los demás. | Se abre con `python src/main.py`. |
+| `main.py` | Sin argumentos abre ahora el **menú principal** (antes abría directo el menú de empleados). | `--demo` y `--listar` no cambiaron. |
+| `tests/test_crud.py` | 20 pruebas nuevas. | En `tests/test_ecotech.py` solo se ajustaron 4 pruebas de menú (39 a 42): ahora escriben primero `1` para entrar a Empleados y terminan con otro `0` para salir del menú principal. |
+
+#### El molde de cada actualización
+
+Cada dato tiene su propia función, todas iguales salvo por el nombre del dato. Este es el molde, con la dirección del empleado como ejemplo:
+
+```python
+def actualizar_direccion():
+    id_empleado = solicitar_id_de("empleado")
+    IntegrityError, OperationalError = tipos_errores_bd()
+    try:
+        empleado = EmpleadoDAO.buscar_por_id(id_empleado)
+        if empleado is None:
+            print("No existe empleado con ese ID.")
+            return
+        nuevo = solicitar("Dirección", Empleado.validar_direccion)
+        if nuevo == empleado.obtenerDireccion():
+            print("El valor es el mismo; no hay cambios.")
+            return
+        empleado.cambiarDireccion(nuevo)
+        filas = EmpleadoDAO.actualizar(empleado)
+    except IntegrityError:
+        print("No se pudo actualizar: revisa las restricciones de la BD.")
+    except OperationalError:
+        print("No se pudo completar la actualización.")
+    else:
+        if filas == 1:
+            print("Dirección actualizado correctamente.")
+        else:
+            print("No hubo cambios en la BD; consulta el ID otra vez.")
+```
+
+Es el mismo recorrido de esa diapositiva, aplicado a otro dato:
+
+| Paso | Línea | Para qué sirve |
+|---|---|---|
+| 1 | `EmpleadoDAO.buscar_por_id(...)` | Traer el objeto desde la base de datos; devuelve el objeto o `None`. |
+| 2 | `if empleado is None` | Resultado normal («no existe»): se resuelve con `if`, no con excepción. |
+| 3 | `solicitar("Dirección", Empleado.validar_direccion)` | Pedir el dato y repetir **solo ese campo** hasta que sea válido. Aquí se pasa una **función sin paréntesis**. |
+| 4 | `if nuevo == empleado.obtenerDireccion()` | Detectar «sin cambios» con el método `obtener…` del UML. |
+| 5 | `empleado.cambiarDireccion(nuevo)` | Aplicar el cambio con el método `cambiar…` del UML. |
+| 6 | `EmpleadoDAO.actualizar(empleado)` | Ejecutar el `UPDATE ... WHERE id` y devolver cuántas filas cambió. |
+| 7 | `except` / `else` | Los errores de BD se capturan; el mensaje de éxito va en `else`, solo cuando todo terminó bien. |
+
+Las demás funciones (`actualizar_nombre`, `actualizar_telefono`, `actualizar_salario`, y las de departamento, proyecto y registro de tiempo) cambian únicamente el DAO, el validador y los métodos `obtener…/cambiar…`.
+
+**Por qué se compara con el valor actual:** en MySQL, un `UPDATE` que deja el mismo valor devuelve 0 filas, y eso parecería un error. Detectar «sin cambios» antes evita ese falso fallo.
+
+**Por qué hay tanto código repetido:** es a propósito. Se prefirió el estilo de las clases (una función clara por acción) a un truco más corto que aún no se ha enseñado. Cuando se vean funciones más avanzadas, esta repetición se podrá reducir.
+
+#### Reglas de integridad (qué NO se puede hacer, a propósito)
+
+| Operación | Resultado | Por qué |
+|---|---|---|
+| Eliminar un departamento con empleados | Rechazado | La FK `empleado.departamento_id` lo impide. Primero se quita o reasigna a los empleados. |
+| Eliminar un proyecto con empleados asignados | Rechazado | La FK de `empleado_proyecto` lo impide. Primero se quita la asignación. |
+| Quitar a un empleado de un proyecto donde tiene horas registradas | Rechazado | La FK compuesta de `registro_tiempo` lo impide. Primero se eliminan esos registros. |
+| Registrar horas en un proyecto no asignado | Rechazado | `RegistroTiempoDAO.insertar()` lo comprueba. |
+| Eliminar un empleado con proyectos | Rechazado | Ya estaba implementado en la Clase 4. |
+
+No hay `ON DELETE CASCADE`: la base de datos **nunca borra datos relacionados en silencio**.
+
+#### Decisión pendiente: «terminar un proyecto»
+
+El UML define `Proyecto` solo con `nombre`, `descripcion` y `fechaInicio`: **no tiene estado ni fecha de término**. Por eso, en esta versión, «un empleado terminó un proyecto» se resuelve **quitando su asignación** (menú *Asignaciones*, opción 2). Si el profesor quiere un estado «terminado» o una fecha de término, eso significa **agregar un atributo al UML y una columna a la base de datos**, y no se hizo sin tu autorización.
+
+#### Cómo probarlo a mano
+
+```bash
+python src/main.py
+```
+
+1. **Departamentos** → registrar «Desarrollo».
+2. **Proyectos** → registrar «EcoTech» con fecha `2026-11-17`.
+3. **Empleados** → registrar uno y luego probar las opciones 6, 7, 8 y 9.
+4. **Asignaciones** → asignar el empleado al proyecto y al departamento; luego quitarlo del proyecto y asignarle otro.
+5. **Registros de tiempo** → registrar horas; luego intentar quitar al empleado de ese proyecto y leer el mensaje.
+
+**Preguntas de recuperación activa (respóndelas sin mirar el código):**
+
+- En `solicitar("Dirección", Empleado.validar_direccion)`, ¿por qué `validar_direccion` va **sin paréntesis**?
+- ¿Qué pasa si escribes la misma dirección que ya tiene el empleado, y por qué?
+- ¿Por qué no se puede eliminar un departamento con empleados? ¿Qué debes hacer antes?
+- ¿Por qué cambiar de proyecto son dos operaciones (quitar y asignar) y no un `UPDATE`?
+- **Feynman:** explícale a un compañero, en tres frases, por qué `RegistroTiempo` impide quitar a un empleado de un proyecto con horas registradas.
+- **Palacio de la memoria:** coloca en tu casa cinco objetos: `buscar_por_id` (puerta de entrada), `solicitar` (recibidor), `obtener…` (sala), `cambiar…` (cocina), `actualizar` del DAO (dormitorio). Recorre la casa en ese orden.
 
 ---
 
@@ -302,10 +422,10 @@ El diagrama se conserva en tres vistas: **(1) modelo de clases**, **(2) relacion
 
 | Clase del UML | Contenido | Estado actual |
 |---|---|---|
-| **Empleado** | `idEmpleado`, `nombre`, `direccion`, `telefono`, `correoElectronico`, `fechaInicioContrato`, `salario`; getters, cambios y asignaciones a proyectos. | Implementación funcional del dominio, validadores y persistencia básica. `id` representa técnicamente `idEmpleado`. |
-| **Departamento** | `nombre`, `gerente`, asociación a empleados, operaciones de asignación y gestión. | Objeto, lista de empleados, asignación/reasignación y `INSERT`. Gestión SQL completa pendiente. |
-| **Proyecto** | `nombre`, `descripcion`, `fechaInicio`, operaciones de creación/modificación/eliminación previstas. | Objeto, cambios de atributos y `INSERT`. CRUD SQL completo pendiente. |
-| **RegistroTiempo** | `fecha`, `horasTrabajadas`, `descripcionTarea`, relación con Empleado y Proyecto. | Objeto, validaciones, asociación e inserción condicionada a proyecto asignado. |
+| **Empleado** | `idEmpleado`, `nombre`, `direccion`, `telefono`, `correoElectronico`, `fechaInicioContrato`, `salario`; getters, cambios y asignaciones a proyectos. | Implementación funcional del dominio, validadores, persistencia y **CRUD completo** (actualiza nombre, dirección, teléfono, correo y salario). `id` representa técnicamente `idEmpleado`. |
+| **Departamento** | `nombre`, `gerente`, asociación a empleados, operaciones de asignación y gestión. | Objeto, lista de empleados, asignación/reasignación y **CRUD SQL** (registrar, listar, buscar, actualizar nombre y gerente, eliminar, asignar y quitar empleados). Los métodos del UML `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento` y `eliminarDepartamento` **siguen sin existir como métodos de la clase**: su función la cumplen hoy el DAO y el menú. |
+| **Proyecto** | `nombre`, `descripcion`, `fechaInicio`, operaciones de creación/modificación/eliminación previstas. | Objeto, cambios de atributos y **CRUD SQL** (registrar, listar, buscar, actualizar nombre, descripción y fecha, eliminar). Los métodos `crearProyecto`, `modificarProyecto` y `eliminarProyecto` **siguen sin existir como métodos de la clase**: los cubren el DAO y el menú. |
+| **RegistroTiempo** | `fecha`, `horasTrabajadas`, `descripcionTarea`, relación con Empleado y Proyecto. | Objeto, validaciones, asociación, inserción condicionada a proyecto asignado y **CRUD SQL** (listar, buscar, actualizar fecha/horas/tarea, eliminar). |
 | **Informe** | Generar informes de empleados, departamentos, proyectos y registros de tiempo; recibe `ControlAcceso`. | **Pendiente** en Python. |
 | **CuentaUsuario** | Nombre de usuario, información protegida de contraseña, sal y rol; comprobación de credenciales. | **Pendiente** en Python. |
 | **ControlAcceso** | Autenticación, autorización, sesión y usuario autenticado. | **Pendiente** en Python. |
@@ -351,11 +471,11 @@ El modelo tampoco utiliza `ON DELETE CASCADE` para borrar automáticamente esas 
 |---|---|---|
 | `conexion.py` | `obtener_motor()`, `abrir_conexion()` | Configura SQLite/MySQL. |
 | `creacion_bd.py` | `crear_tablas()` | Revisa tablas existentes y crea las cinco tablas. No migra bases antiguas. |
-| `empleado_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()` | CRUD con UPDATE del correo en la versión actual. |
-| `departamento_dao.py` | `insertar()` | Inserción y asignación del ID. |
-| `proyecto_dao.py` | `insertar()` | Inserción y asignación del ID. |
-| `empleado_proyecto_dao.py` | `asignar()`, `listar_por_empleado()`, `listar_por_proyecto()` | Persistencia de la relación N:M y lectura de ambas direcciones. |
-| `registro_tiempo_dao.py` | `insertar()` | Inserta solo cuando hay una asignación válida. |
+| `empleado_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()` | CRUD completo; `actualizar()` guarda nombre, dirección, teléfono, correo y salario. |
+| `departamento_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()`, `asignar_empleado()`, `quitar_empleado()`, `listar_empleados()` | CRUD y pertenencia de empleados al departamento. |
+| `proyecto_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()` | CRUD completo. |
+| `empleado_proyecto_dao.py` | `asignar()`, `desasignar()`, `listar_por_empleado()`, `listar_por_proyecto()` | Persistencia de la relación N:M, quitar asignaciones y lectura de ambas direcciones. |
+| `registro_tiempo_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()`, `reconstruir()` | Inserta solo cuando hay una asignación válida; actualiza fecha, horas y tarea. |
 
 `cursor.execute(sql, parametros)` recibe valores separados del texto SQL. `fetchall()` recupera todas las filas; `fetchone()` recupera una fila o `None`. `cursor.rowcount` permite comprobar cuántas filas modificó o eliminó una operación; `cursor.lastrowid` obtiene el identificador de un `INSERT`.
 
@@ -441,7 +561,18 @@ Desde la raíz del repositorio:
 python src/main.py
 ```
 
-Abre el **menú de empleados** (opción normal). En la versión aquí documentada, sus opciones son:
+Abre el **menú principal** con todas las entidades:
+
+```text
+1. Empleados
+2. Departamentos
+3. Proyectos
+4. Asignaciones
+5. Registros de tiempo
+0. Salir
+```
+
+La opción **1. Empleados** abre el menú de empleados, cuyas opciones son:
 
 ```text
 1. Registrar empleado
@@ -449,8 +580,14 @@ Abre el **menú de empleados** (opción normal). En la versión aquí documentad
 3. Buscar empleado por ID
 4. Actualizar correo
 5. Eliminar empleado
+6. Actualizar dirección
+7. Actualizar teléfono
+8. Actualizar nombre
+9. Actualizar salario
 0. Salir
 ```
+
+En cada submenú, la opción `0` vuelve al menú principal.
 
 Para consultar empleados sin registrar nuevos:
 
@@ -477,7 +614,7 @@ python -m compileall -q src
 python -m unittest discover -s tests -v
 ```
 
-La versión de reemplazo examinada contiene **44 pruebas**. Se comprobó el resultado **44/44 `OK` en SQLite** en el entorno de revisión y el estudiante confirmó que **también terminaron en `OK` en su computador Windows** después de aplicar la corrección de cierre de conexiones. Esto **no** sustituye una prueba real con MySQL/WampServer.
+La versión actual contiene **64 pruebas**: 44 en `tests/test_ecotech.py` y 20 en `tests/test_crud.py`. En el entorno de revisión (Linux) se comprobó **64/64 `OK` en SQLite**. Las 44 originales ya las confirmaste en tu computador Windows (antes del ajuste de 4 pruebas de menú); **ni ese ajuste ni las 20 nuevas se han ejecutado todavía en Windows**. Además, el CRUD completo se recorrió contra MariaDB 10.11 con PyMySQL en una base nueva. Nada de esto sustituye una prueba real con MySQL/WampServer.
 
 Las pruebas cubren, entre otros aspectos:
 
@@ -625,18 +762,19 @@ En particular, conservar `docs/audt_diagr/ALCANCE_Y_AUDITORIA.md`, el UML final,
 - DAO para inserción de las entidades principales y consultas de empleados.
 - Validación reutilizable de los campos de Empleado.
 - Menú de consola con reintentos individuales y búsqueda por ID.
-- `UPDATE` **del correo** y `DELETE` confirmado de Empleado.
+- `UPDATE` de nombre, dirección, teléfono, correo y salario, y `DELETE` confirmado de Empleado.
+- CRUD de Departamento, Proyecto y RegistroTiempo, y asignación/cambio de proyecto y de departamento.
 - Pruebas automáticas de persistencia, validación y restricciones.
 - Documentos y versiones anteriores de los diagramas conservados en `docs/`.
 
 ### Pendiente o no comprobado todavía
 
-1. **CRUD ampliado de Empleado:** actualizar nombre, dirección, teléfono, fecha de contrato y salario desde el menú y guardarlos con SQL.
-2. **Gestión de proyectos desde la consola:** registrar/listar/buscar proyectos y asignarlos a empleados usando el DAO N:M que ya existe.
-3. **CRUD SQL de Departamento, Proyecto y otras entidades:** completar métodos que aparecen en el UML sin inventarlos ni atribuirlos a clases anteriores.
+1. **Fecha de contrato del empleado:** no se puede cambiar por menú, porque el UML no define `cambiarFechaInicioContrato`.
+2. **Estado «terminado» de un proyecto:** el UML no lo define (ver «Decisión pendiente» en la sección 4).
+3. **Métodos del UML en las clases de dominio:** `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento`, `eliminarDepartamento`, `crearProyecto`, `modificarProyecto` y `eliminarProyecto` siguen sin existir como métodos; su función la cumplen el DAO y los menús.
 4. **Otras clases del UML:** `Informe`, `CuentaUsuario` y `ControlAcceso`, con sus comportamientos y validaciones, cuando corresponda al curso.
 5. **Prueba real en MySQL/WampServer:** apertura de conexión, creación del esquema, `INSERT`/`SELECT`, relaciones, errores de integridad y operaciones CRUD. No se afirma que esté realizada.
-6. **Publicación del nuevo README:** las 44 pruebas en Windows y la fusión de Git ya fueron confirmadas por el estudiante; la rama `main` se verificó en el commit `0c46c40`. **Esta documentación ampliada todavía requiere copiarse y publicarse** mediante los comandos de la sección 9. Se debe comprobar el resultado final de ese nuevo push.
+6. **Publicación de la ampliación:** las 44 pruebas originales en Windows y la fusión de Git ya fueron confirmadas por el estudiante; la rama `main` se verificó en el commit `49432e9`. **El CRUD completo y este README todavía requieren ejecutar las 64 pruebas en Windows, copiarse y publicarse** mediante los comandos de la sección 9. Se debe comprobar el resultado final de ese push.
 
 ### Criterio para los próximos avances
 

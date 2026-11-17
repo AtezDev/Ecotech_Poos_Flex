@@ -312,8 +312,8 @@ class TestEcoTech(unittest.TestCase):
         self.assertIsNotNone(EmpleadoDAO.buscar_por_id(e.id))
 
     def test_39_menu_reintenta_solo_telefono(self):
-        entrada = "\n".join(["1", "Ana Torres", "La Serena", "abc", "+56912345678",
-                             "ana@ecotech.cl", "2026-11-12", "950000", "0", ""])
+        entrada = "\n".join(["1", "1", "Ana Torres", "La Serena", "abc", "+56912345678",
+                             "ana@ecotech.cl", "2026-11-12", "950000", "0", "0", ""])
         env = os.environ.copy()
         proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
                                  cwd=self.tmp.name, env=env, input=entrada,
@@ -327,7 +327,7 @@ class TestEcoTech(unittest.TestCase):
     def test_40_menu_listar_buscar_sin_modificar(self):
         e = self.empleado()
         EmpleadoDAO.insertar(e)
-        entrada = f"2\n3\n{e.id}\n0\n"
+        entrada = f"1\n2\n3\n{e.id}\n0\n0\n"
         proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
                                  cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
                                  capture_output=True, text=True)
@@ -338,7 +338,7 @@ class TestEcoTech(unittest.TestCase):
     def test_41_menu_actualizar_y_cancelar_eliminacion(self):
         e = self.empleado()
         EmpleadoDAO.insertar(e)
-        entrada = f"4\n{e.id}\nnuevo@ecotech.cl\n5\n{e.id}\nn\n0\n"
+        entrada = f"1\n4\n{e.id}\nnuevo@ecotech.cl\n5\n{e.id}\nn\n0\n0\n"
         proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
                                  cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
                                  capture_output=True, text=True)
@@ -349,9 +349,9 @@ class TestEcoTech(unittest.TestCase):
 
 
     def test_42_menu_reintenta_correo_fecha_y_salario(self):
-        entrada = "\n".join(["1", "Ana Torres", "La Serena", "+56912345678",
+        entrada = "\n".join(["1", "1", "Ana Torres", "La Serena", "+56912345678",
                              "ana@", "ana@ecotech.cl", "2026-02-30", "2026-11-12",
-                             "abc", "950000", "0", ""])
+                             "abc", "950000", "0", "0", ""])
         proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
                                  cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
                                  capture_output=True, text=True)

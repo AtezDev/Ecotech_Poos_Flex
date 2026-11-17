@@ -166,12 +166,127 @@ def eliminar_empleado():
             print("No se eliminó: vuelve a consultar el ID.")
 
 
+def solicitar_id_de(entidad):
+    while True:
+        texto = input(f"ID de {entidad}: ").strip()
+        try:
+            numero = int(texto)
+            if numero <= 0:
+                raise ValueError("El ID debe ser positivo.")
+        except ValueError:
+            print("Ingresa un número entero mayor que cero.")
+        else:
+            return numero
+
+
+def actualizar_nombre():
+    id_empleado = solicitar_id_de("empleado")
+    IntegrityError, OperationalError = tipos_errores_bd()
+    try:
+        empleado = EmpleadoDAO.buscar_por_id(id_empleado)
+        if empleado is None:
+            print("No existe empleado con ese ID.")
+            return
+        nuevo = solicitar("Nombre", Empleado.validar_nombre)
+        if nuevo == empleado.obtenerNombre():
+            print("El valor es el mismo; no hay cambios.")
+            return
+        empleado.cambiarNombre(nuevo)
+        filas = EmpleadoDAO.actualizar(empleado)
+    except IntegrityError:
+        print("No se pudo actualizar: revisa las restricciones de la BD.")
+    except OperationalError:
+        print("No se pudo completar la actualización.")
+    else:
+        if filas == 1:
+            print("Nombre actualizado correctamente.")
+        else:
+            print("No hubo cambios en la BD; consulta el ID otra vez.")
+
+
+def actualizar_direccion():
+    id_empleado = solicitar_id_de("empleado")
+    IntegrityError, OperationalError = tipos_errores_bd()
+    try:
+        empleado = EmpleadoDAO.buscar_por_id(id_empleado)
+        if empleado is None:
+            print("No existe empleado con ese ID.")
+            return
+        nuevo = solicitar("Dirección", Empleado.validar_direccion)
+        if nuevo == empleado.obtenerDireccion():
+            print("El valor es el mismo; no hay cambios.")
+            return
+        empleado.cambiarDireccion(nuevo)
+        filas = EmpleadoDAO.actualizar(empleado)
+    except IntegrityError:
+        print("No se pudo actualizar: revisa las restricciones de la BD.")
+    except OperationalError:
+        print("No se pudo completar la actualización.")
+    else:
+        if filas == 1:
+            print("Dirección actualizado correctamente.")
+        else:
+            print("No hubo cambios en la BD; consulta el ID otra vez.")
+
+
+def actualizar_telefono():
+    id_empleado = solicitar_id_de("empleado")
+    IntegrityError, OperationalError = tipos_errores_bd()
+    try:
+        empleado = EmpleadoDAO.buscar_por_id(id_empleado)
+        if empleado is None:
+            print("No existe empleado con ese ID.")
+            return
+        nuevo = solicitar("Teléfono", Empleado.validar_telefono)
+        if nuevo == empleado.obtenerTelefono():
+            print("El valor es el mismo; no hay cambios.")
+            return
+        empleado.cambiarTelefono(nuevo)
+        filas = EmpleadoDAO.actualizar(empleado)
+    except IntegrityError:
+        print("No se pudo actualizar: revisa las restricciones de la BD.")
+    except OperationalError:
+        print("No se pudo completar la actualización.")
+    else:
+        if filas == 1:
+            print("Teléfono actualizado correctamente.")
+        else:
+            print("No hubo cambios en la BD; consulta el ID otra vez.")
+
+
+def actualizar_salario():
+    id_empleado = solicitar_id_de("empleado")
+    IntegrityError, OperationalError = tipos_errores_bd()
+    try:
+        empleado = EmpleadoDAO.buscar_por_id(id_empleado)
+        if empleado is None:
+            print("No existe empleado con ese ID.")
+            return
+        nuevo = solicitar("Salario", solicitar_salario)
+        if nuevo == empleado.obtenerSalario():
+            print("El valor es el mismo; no hay cambios.")
+            return
+        empleado.cambiarSalario(nuevo)
+        filas = EmpleadoDAO.actualizar(empleado)
+    except IntegrityError:
+        print("No se pudo actualizar: revisa las restricciones de la BD.")
+    except OperationalError:
+        print("No se pudo completar la actualización.")
+    else:
+        if filas == 1:
+            print("Salario actualizado correctamente.")
+        else:
+            print("No hubo cambios en la BD; consulta el ID otra vez.")
+
+
 def menu_empleados():
     # Menú del docente: while True mantiene viva la aplicación hasta la opción 0.
     while True:
         print("\n--- ECOTECH: EMPLEADOS ---")
         print("1. Registrar\n2. Listar\n3. Buscar por ID")
-        print("4. Actualizar correo\n5. Eliminar\n0. Salir")
+        print("4. Actualizar correo\n5. Eliminar")
+        print("6. Actualizar dirección\n7. Actualizar teléfono")
+        print("8. Actualizar nombre\n9. Actualizar salario\n0. Salir")
         opcion = input("Opción: ").strip()
         if opcion == "1":
             crear_empleado()
@@ -183,8 +298,16 @@ def menu_empleados():
             actualizar_empleado()
         elif opcion == "5":
             eliminar_empleado()
+        elif opcion == "6":
+            actualizar_direccion()
+        elif opcion == "7":
+            actualizar_telefono()
+        elif opcion == "8":
+            actualizar_nombre()
+        elif opcion == "9":
+            actualizar_salario()
         elif opcion == "0":
             print("Saliendo de EcoTech.")
             break  # Sale del while, no de toda la computadora.
         else:
-            print("Elige una opción entre 0 y 5.")
+            print("Elige una opción entre 0 y 9.")

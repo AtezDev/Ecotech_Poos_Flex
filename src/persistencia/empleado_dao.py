@@ -71,15 +71,18 @@ class EmpleadoDAO:
 
     @staticmethod
     def actualizar(empleado):
-        # Hoy solo cambiamos el correo, como en la Clase 4 del profesor.
         if empleado.id is None:
             raise ValueError("Primero debes guardar el empleado.")
         conexion = abrir_conexion()
         try:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
-            sql = f"UPDATE empleado SET correo = {marcador} WHERE id = {marcador}"
-            cursor.execute(sql, (empleado.correoElectronico, empleado.id))
+            sql = (f"UPDATE empleado SET nombre = {marcador}, direccion = {marcador}, "
+                   f"telefono = {marcador}, correo = {marcador}, salario = {marcador} "
+                   f"WHERE id = {marcador}")
+            valores = (empleado.nombre, empleado.direccion, empleado.telefono,
+                       empleado.correoElectronico, empleado.salario, empleado.id)
+            cursor.execute(sql, valores)
             filas = cursor.rowcount
             conexion.commit()
             return filas  # 1: actualizado; 0: no había registro con ese ID.

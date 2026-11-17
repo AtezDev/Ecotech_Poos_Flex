@@ -5,9 +5,9 @@ El objetivo de esta carpeta es aprender **sin eliminar nada del UML**. Los ejemp
 | Clase del UML | Estado de la implementación actual |
 |---|---|
 | Empleado | Siete atributos del UML (el ID es generado por BD y se protege después); getters, cambios, validadores y `registrarEmpleado`, `asignarAProyecto`, `desasignarDeProyecto` |
-| Departamento | Nombre/gerente, lista de empleados, asignación y reasignación, getters/setters. **Pendientes UML:** `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento`, `eliminarDepartamento` como operaciones completas |
-| Proyecto | Nombre/descripcion/fecha, cambios y getters. **Pendientes UML:** `crearProyecto`, `modificarProyecto`, `eliminarProyecto` como operaciones completas |
-| RegistroTiempo | Fecha/horas/descripcion, getters/cambios, asociación a Empleado–Proyecto y registro en BD |
+| Departamento | Nombre/gerente, lista de empleados, asignación y reasignación, getters/setters. CRUD SQL completo en `DepartamentoDAO` y `menu_departamento.py`. **Pendientes UML:** `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento`, `eliminarDepartamento` como **métodos de la clase** |
+| Proyecto | Nombre/descripcion/fecha, cambios y getters. CRUD SQL completo en `ProyectoDAO` y `menu_proyecto.py`. **Pendientes UML:** `crearProyecto`, `modificarProyecto`, `eliminarProyecto` como **métodos de la clase** |
+| RegistroTiempo | Fecha/horas/descripcion, getters/cambios, asociación a Empleado–Proyecto, registro en BD y CRUD SQL completo (`menu_registro_tiempo.py`) |
 | Informe | **Pendiente de futuras clases**: los cuatro métodos de generación y la dependencia de `ControlAcceso` |
 | CuentaUsuario | **Pendiente**: nombre de usuario, hash de contraseña, sal, rol y verificación |
 | ControlAcceso | **Pendiente**: autenticar, autorizar, cerrar sesión |
@@ -22,14 +22,17 @@ El objetivo de esta carpeta es aprender **sin eliminar nada del UML**. Los ejemp
 - `registro_tiempo` depende de una pareja previamente registrada (FK compuesta).
 - No hay borrado en cascada: un DELETE de Empleado con proyectos relacionados debe ser rechazado.
 
-## CRUD real de la Clase 4
+## CRUD (Clase 4 y ampliación del 17-nov-2026)
 
 - `EmpleadoDAO.insertar`: CREATE.
 - `EmpleadoDAO.listar` y `buscar_por_id`: READ.
-- `EmpleadoDAO.actualizar`: UPDATE **solo del correo**, según la demostración del profesor.
+- `EmpleadoDAO.actualizar`: UPDATE de nombre, dirección, teléfono, correo y salario (en la Clase 4 del profesor solo se mostró el correo).
 - `EmpleadoDAO.eliminar`: DELETE por ID con confirmación en el menú.
 
-**Pendiente:** ampliar UPDATE para otros atributos y operaciones SQL para otras entidades cuando se trabaje en clases. El resto del proyecto está conservado.
+- `DepartamentoDAO`, `ProyectoDAO` y `RegistroTiempoDAO`: listar, buscar por ID, actualizar y eliminar.
+- `EmpleadoProyectoDAO.desasignar` y `DepartamentoDAO.asignar_empleado/quitar_empleado`: cambiar de proyecto y de departamento.
+
+**Pendiente:** fecha de contrato del empleado (el UML no define su cambio) y estado «terminado» de un proyecto (el UML no lo define). El resto del proyecto está conservado.
 
 ## Material original y seguridad
 

@@ -56,3 +56,21 @@ class EmpleadoProyectoDAO:
             return [fila[0] for fila in filas]
         finally:
             conexion.close()
+
+    @staticmethod
+    def desasignar(empleado, proyecto):
+        if empleado.id is None or proyecto.id is None:
+            raise ValueError("Primero debes guardar el empleado y el proyecto.")
+
+        conexion = abrir_conexion()
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            sql = ("DELETE FROM empleado_proyecto "
+                   f"WHERE empleado_id = {marcador} AND proyecto_id = {marcador}")
+            cursor.execute(sql, (empleado.id, proyecto.id))
+            filas = cursor.rowcount
+            conexion.commit()
+            return filas == 1
+        finally:
+            conexion.close()
