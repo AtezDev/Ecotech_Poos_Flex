@@ -7,7 +7,9 @@ from presentacion.menu_empleado import solicitar, solicitar_id_de, tipos_errores
 
 def crear_departamento():
     nombre = solicitar("Nombre", validar_texto_obligatorio)
-    gerente = solicitar("Gerente", validar_texto_obligatorio)
+    print("El gerente es una persona: escribe nombre y apellido, solo con letras.")
+    print("Ejemplo: Javier Ahumada")
+    gerente = solicitar("Gerente", Departamento.validar_gerente)
     departamento = Departamento(nombre, gerente)
     IntegrityError, OperationalError = tipos_errores_bd()
     try:
@@ -61,7 +63,8 @@ def actualizar_gerente_departamento():
         if departamento is None:
             print("No existe departamento con ese ID.")
             return
-        nuevo = solicitar("Gerente", validar_texto_obligatorio)
+        print("El gerente es una persona: escribe nombre y apellido, solo con letras.")
+        nuevo = solicitar("Gerente", Departamento.validar_gerente)
         if nuevo == departamento.obtenerGerente():
             print("El valor es el mismo; no hay cambios.")
             return

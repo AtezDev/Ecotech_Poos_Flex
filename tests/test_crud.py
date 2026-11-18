@@ -196,7 +196,7 @@ class TestCrud(unittest.TestCase):
                          '2', '3', '1', '4', '1', 'Operaciones', '5', '1', 'Marta Rojas',
                          '6', '1', 'n', '6', '1', 's', '0', '0')
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn('Este dato es obligatorio.', r.stdout)
+        self.assertIn('Gerente inválido:', r.stdout)
         self.assertIn('Departamento registrado. ID: 1', r.stdout)
         self.assertIn('Nombre actualizado correctamente.', r.stdout)
         self.assertIn('Gerente actualizado correctamente.', r.stdout)

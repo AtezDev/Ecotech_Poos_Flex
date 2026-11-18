@@ -1,4 +1,6 @@
+from datetime import date
 from dominio.departamento import Departamento
+from dominio.empleado import Empleado
 from persistencia.conexion import abrir_conexion, obtener_motor
 
 
@@ -115,3 +117,32 @@ class DepartamentoDAO:
             return ids
         finally:
             conexion.close()
+
+    @staticmethod
+    def reconstruir_departamento(filas):
+        if not filas:
+            return None
+        departamento = Departamento(filas[0][1], filas[0][2], id=filas[0][0])
+        for _, _, _, id_emp, nombre, direccion, telefono, correo, fecha, salario in filas:
+            if id_emp is not None:
+                empleado = Empleado(nombre, direccion, telefono, correo,
+                                    date.fromisoformat(str(fecha)), float(salario), id=id_emp)
+                departamento.agregar_empleado(empleado)
+        return departamento
+
+    @staticmethod
+    def buscar_con_empleados(id_departamento):
+        conexion = abrir_conexion()
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            sql = f"""SELECT d.id, d.nombre, d.gerente, e.id, e.nombre, e.direccion,
+                      e.telefono, e.correo, e.fecha_inicio_contrato, e.salario
+                      FROM departamento d LEFT JOIN empleado e
+                      ON e.departamento_id = d.id
+                      WHERE d.id = {marcador} ORDER BY e.id"""
+            cursor.execute(sql, (id_departamento,))
+            filas = cursor.fetchall()
+        finally:
+            conexion.close()
+        return DepartamentoDAO.reconstruir_departamento(filas)

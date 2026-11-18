@@ -1,6 +1,7 @@
 from datetime import date
 from math import isfinite
 from dominio.proyecto import Proyecto
+from dominio.departamento import departamento
 
 
 class Empleado:
@@ -18,6 +19,7 @@ class Empleado:
         self.salario = self.validar_salario(salario)
         self.departamento = None
         self._proyectos = []
+        self.departamento = None
 
     # @staticmethod: no necesita usar self, porque valida un valor aislado.
     # raise ValueError avisa qué dato es incorrecto; el menú usa except para repetirlo.

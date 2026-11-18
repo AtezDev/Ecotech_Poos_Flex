@@ -7,6 +7,7 @@
 - **FLEX Clase 3:** `@property`, setters, nombre/correo, lista y búsqueda por ID.
 - **FLEX Clase 4:** menú, `while True`, reintentos por campo, `try/except`, UPDATE de correo y DELETE confirmado.
 - **CRUD completo (17-nov-2026):** actualizar nombre, dirección, teléfono, correo y salario del empleado; CRUD de Departamento, Proyecto y RegistroTiempo; asignar/quitar empleado de proyecto y de departamento; menú principal con todas las entidades (`python src/main.py`).
+- **FLEX Clase 5 (17-nov-2026):** referencia y colección Empleado–Departamento, FK guardada y recuperada (`actualizar_departamento`, `buscar_con_empleados`), reportes con herencia y polimorfismo, gerente validado y departamento visible al listar empleados. **Pendiente:** semillas (desafío autónomo).
 - **Conservado:** relación Empleado–Proyecto N:M, tabla puente y FK compuesta de RegistroTiempo.
 - **Pendiente:** los comportamientos avanzados del UML y las clases Informe, CuentaUsuario y ControlAcceso, y métodos del UML como `crearDepartamento` o `eliminarProyecto`, que hoy cubren el DAO y el menú.
 - **Pruebas:** SQLite temporal; ejecutar también en Windows y posteriormente en MySQL/WampServer.
