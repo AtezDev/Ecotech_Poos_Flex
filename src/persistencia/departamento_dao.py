@@ -1,5 +1,8 @@
+from datetime import date
 from dominio.departamento import Departamento
+from dominio.empleado import Empleado
 from persistencia.conexion import abrir_conexion, obtener_motor
+from persistencia.empleado_dao import EmpleadoDAO
 
 
 class DepartamentoDAO:
@@ -7,14 +10,17 @@ class DepartamentoDAO:
     def insertar(departamento):
         if departamento.id is not None:
             raise ValueError("Este departamento ya fue guardado.")
+        if departamento.gerente is not None and departamento.gerente.id is None:
+            raise ValueError("Primero debes guardar al empleado que será gerente.")
 
         conexion = abrir_conexion()
         try:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
-            sql = f"INSERT INTO departamento (nombre, gerente) VALUES ({marcador}, {marcador})"
+            gerente_id = departamento.gerente.id if departamento.gerente is not None else None
+            sql = f"INSERT INTO departamento (nombre, gerente_id) VALUES ({marcador}, {marcador})"
             # Los valores van separados del SQL, nunca concatenados con el usuario.
-            cursor.execute(sql, (departamento.nombre, departamento.gerente))
+            cursor.execute(sql, (departamento.nombre, gerente_id))
             nuevo_id = cursor.lastrowid
             conexion.commit()
             departamento.id = nuevo_id
@@ -27,12 +33,15 @@ class DepartamentoDAO:
         conexion = abrir_conexion()
         try:
             cursor = conexion.cursor()
-            cursor.execute("SELECT id, nombre, gerente FROM departamento ORDER BY id")
+            cursor.execute("SELECT id, nombre, gerente_id FROM departamento ORDER BY id")
             filas = cursor.fetchall()
         finally:
             conexion.close()
         departamentos = []
-        for id_departamento, nombre, gerente in filas:
+        for id_departamento, nombre, gerente_id in filas:
+            gerente = None
+            if gerente_id is not None:
+                gerente = EmpleadoDAO.buscar_por_id(gerente_id)
             departamentos.append(Departamento(nombre, gerente, id=id_departamento))
         return departamentos
 
@@ -42,25 +51,31 @@ class DepartamentoDAO:
         try:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
-            cursor.execute(f"SELECT id, nombre, gerente FROM departamento WHERE id = {marcador}",
+            cursor.execute(f"SELECT id, nombre, gerente_id FROM departamento WHERE id = {marcador}",
                            (id_departamento,))
             fila = cursor.fetchone()
         finally:
             conexion.close()
         if fila is None:
             return None
-        return Departamento(fila[1], fila[2], id=fila[0])
+        gerente = None
+        if fila[2] is not None:
+            gerente = EmpleadoDAO.buscar_por_id(fila[2])
+        return Departamento(fila[1], gerente, id=fila[0])
 
     @staticmethod
     def actualizar(departamento):
         if departamento.id is None:
             raise ValueError("Primero debes guardar el departamento.")
+        if departamento.gerente is not None and departamento.gerente.id is None:
+            raise ValueError("Primero debes guardar al empleado que será gerente.")
         conexion = abrir_conexion()
         try:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
-            sql = f"UPDATE departamento SET nombre = {marcador}, gerente = {marcador} WHERE id = {marcador}"
-            cursor.execute(sql, (departamento.nombre, departamento.gerente, departamento.id))
+            sql = f"UPDATE departamento SET nombre = {marcador}, gerente_id = {marcador} WHERE id = {marcador}"
+            gerente_id = departamento.gerente.id if departamento.gerente is not None else None
+            cursor.execute(sql, (departamento.nombre, gerente_id, departamento.id))
             filas = cursor.rowcount
             conexion.commit()
             return filas
@@ -115,3 +130,35 @@ class DepartamentoDAO:
             return ids
         finally:
             conexion.close()
+
+    @staticmethod
+    def reconstruir_departamento(filas):
+        if not filas:
+            return None
+        gerente = None
+        if filas[0][2] is not None:
+            gerente = EmpleadoDAO.buscar_por_id(filas[0][2])
+        departamento = Departamento(filas[0][1], gerente, id=filas[0][0])
+        for _, _, _, id_emp, nombre, direccion, telefono, correo, fecha, salario in filas:
+            if id_emp is not None:
+                empleado = Empleado(nombre, direccion, telefono, correo,
+                                    date.fromisoformat(str(fecha)), float(salario), id=id_emp)
+                departamento.agregar_empleado(empleado)
+        return departamento
+
+    @staticmethod
+    def buscar_con_empleados(id_departamento):
+        conexion = abrir_conexion()
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            sql = f"""SELECT d.id, d.nombre, d.gerente_id, e.id, e.nombre, e.direccion,
+                      e.telefono, e.correo, e.fecha_inicio_contrato, e.salario
+                      FROM departamento d LEFT JOIN empleado e
+                      ON e.departamento_id = d.id
+                      WHERE d.id = {marcador} ORDER BY e.id"""
+            cursor.execute(sql, (id_departamento,))
+            filas = cursor.fetchall()
+        finally:
+            conexion.close()
+        return DepartamentoDAO.reconstruir_departamento(filas)

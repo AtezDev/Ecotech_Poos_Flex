@@ -5,7 +5,9 @@
 **Guía de diseño:** [`docs/audt_diagr/Diagrama_Final.drawio`](docs/audt_diagr/Diagrama_Final.drawio) — UML definitivo de **tres vistas**.  
 **Alcance documentado:** avances hasta **FLEX Unidades 2–3, Clase 4: «Menú y manejo de excepciones»**, más las implementaciones complementarias necesarias para respetar el UML y la **ampliación del CRUD a todas las entidades implementadas** (sección 4, «CRUD completo»).
 
-**Estado de GitHub comprobado:** rama `main`, commit `49432e9` (*actualizacion Readme*, 13 de noviembre de 2026). El estudiante confirmó que las **44 pruebas originales terminaron en `OK` en Windows** y que el `push` de la fusión fue exitoso.
+**Estado de GitHub comprobado al preparar esta carpeta:** rama `main`, último commit visible `03308d6` (*Actualizacion CRUD*, 17 de noviembre de 2026). El estudiante confirmó que las **44 pruebas originales terminaron en `OK` en Windows** y que el `push` de la fusión fue exitoso.
+
+**Ampliación de la Clase 5 (17 de noviembre, noche):** el gerente como llave foránea a `empleado` (decisión del profesor), el departamento visible al listar o buscar un empleado, la relación Empleado–Departamento guardada y recuperada (`actualizar_departamento`, `buscar_con_empleados`), y reportes con herencia y polimorfismo (`dominio/reporte.py`). la propiedad `departamento` con setter validado (Paso 5), `imprimir_reportes()` y las **semillas** (`persistencia/semillas.py`, opción 6 del menú principal). Pasaron **94/94 pruebas en SQLite** (Linux) y un recorrido contra MariaDB 10.11 (incluida la llave circular `gerente_id` y las semillas dos veces); **falta ejecutarlas en tu Windows**.
 
 **Ampliación del 17 de noviembre de 2026 (CRUD completo):** se agregan actualización de nombre, dirección, teléfono y salario del empleado, CRUD de Departamento, Proyecto y RegistroTiempo, asignación y cambio de proyecto, y un menú principal que reúne todo (`python src/main.py`). En el entorno de revisión (Linux) pasaron **64/64 pruebas en SQLite** (44 originales, con 4 de ellas ajustadas por el nuevo menú principal, + 20 nuevas) y un recorrido completo del CRUD contra **MariaDB 10.11 con PyMySQL** en una base nueva. **No se ha probado todavía en Windows ni en MySQL de WampServer**: ese paso lo debes hacer tú antes del `push` (sección 8).
 
@@ -78,13 +80,15 @@ Ecotech_Poos_Flex/
 │   │   ├── empleado.py
 │   │   ├── departamento.py
 │   │   ├── proyecto.py
-│   │   └── registro_tiempo.py
+│   │   ├── registro_tiempo.py
+│   │   └── reporte.py                  # Clase 5: reportes (herencia y polimorfismo)
 │   ├── persistencia/                   # Bases de datos y DAO
 │   │   ├── __init__.py
 │   │   ├── conexion.py
 │   │   ├── creacion_bd.py
 │   │   ├── empleado_dao.py
 │   │   ├── departamento_dao.py
+│   │   ├── semillas.py                 # Clase 5: datos de ejemplo sin duplicados
 │   │   ├── proyecto_dao.py
 │   │   ├── empleado_proyecto_dao.py
 │   │   └── registro_tiempo_dao.py
@@ -99,7 +103,8 @@ Ecotech_Poos_Flex/
 │       └── menu_principal.py           # Menú principal (lo abre python src/main.py)
 ├── tests/
 │   ├── test_ecotech.py                # 44 casos de prueba originales
-│   └── test_crud.py                   # 20 casos nuevos del CRUD completo
+│   ├── test_crud.py                   # 20 casos nuevos del CRUD completo
+│   └── test_clase5.py                 # 30 casos de la Clase 5, del gerente y de las semillas
 ├── docs/
 │   ├── audt_diagr/
 │   │   ├── Diagrama_Final.drawio       # UML definitivo: 3 vistas
@@ -416,6 +421,86 @@ python src/main.py
 
 ---
 
+### FLEX — Clase 5: Empleado y Departamento, relacionar, guardar y recuperar
+
+**Material:** `Flex_U2_U3_Clase5_Relaciones_Herencia_Polimorfismo.pdf` (todavía no está en `docs/material_profesor/`; agrégalo allí si quieres conservarlo con los demás).
+
+**Vimos en clases:** una referencia `empleado.departamento` que empieza en `None`; la colección `Departamento._empleados` con la propiedad `empleados`; `agregar_empleado()` que coordina referencia y colección sin duplicar; la FK `empleado.departamento_id`; `EmpleadoDAO.actualizar_departamento()`; `DepartamentoDAO.buscar_con_empleados()` y la reconstrucción del objeto con su colección; reportes con herencia (`ReporteEmpleados` y `ReportePorDepartamento`, `super().__init__`) y polimorfismo (el mismo `generar()` en una lista de reportes); y las semillas.
+
+#### Mejoras que pediste hoy (antes de la Clase 5)
+
+**1. El gerente ahora es un empleado (llave foránea).** Antes, escribir `2` como gerente se aceptaba porque era solo texto. El profesor propuso guardar el **ID del empleado** en `departamento.gerente_id`, una llave foránea a `empleado.id`. Respuestas del profesor: el gerente puede ser **cualquier empleado** (no tiene que pertenecer al departamento que dirige), y `gerente_id` **puede quedar vacío** (`NULL`): el departamento se crea sin gerente y se le asigna uno después.
+
+| Situación | Resultado |
+|---|---|
+| Registrar un departamento y aún no hay empleados | Mensaje: «el departamento quedará sin gerente… asigna el gerente con la opción 5». |
+| Registrar con empleados | El menú muestra la lista `ID: nombre` y pide el ID del gerente (Enter = sin gerente). |
+| `abc` | «Escribe solo el número de ID del empleado.» y vuelve a preguntar. |
+| `99` (no existe) | «No existe ningún empleado con ese ID. Elige uno de la lista.» y vuelve a preguntar. |
+| Opción 5 «Actualizar gerente» | Asigna, cambia o quita el gerente (Enter). Si es el mismo, «El valor es el mismo; no hay cambios.» |
+| Borrar un empleado que es gerente | La FK lo impide: «No se puede eliminar: tiene relaciones u otra restricción.» |
+| La BD recibe un `gerente_id` inexistente | La FK lo rechaza (`IntegrityError`). |
+
+- **Dominio:** `Departamento(nombre, gerente=None, id=None)`. `gerente` es un objeto `Empleado` o `None`; un texto como `'2'` o `'Javier'` lanza `ValueError`. `cambiarGerente()` devuelve `True`/`False`. `validar_gerente` (texto) ya no existe.
+- **Orden de creación:** `departamento` y `empleado` se apuntan entre sí. Primero se crea el empleado (queda sin departamento, 0..1), luego el departamento con su gerente y después se asigna el empleado.
+- **Persistencia:** `DepartamentoDAO.listar()`, `buscar_por_id()` y `buscar_con_empleados()` usan `LEFT JOIN empleado g ON d.gerente_id = g.id` para traer al gerente; `insertar()` y `actualizar()` guardan `gerente_id`; si el gerente aún no está guardado (`id is None`) lanzan `ValueError`.
+- **MySQL:** como la tabla `departamento` se crea antes que `empleado` y la referencia, `crear_tablas()` apaga un instante `FOREIGN_KEY_CHECKS` mientras crea las tablas y lo vuelve a encender. En SQLite no hace falta.
+- **Bases antiguas:** si tu base ya tiene `departamento.gerente` (texto), `crear_tablas()` avisa «esquema incompatible. Faltan: gerente_id». Usa una **base nueva** (por ejemplo `ecotech_practica`), o migra a mano en MySQL: `ALTER TABLE departamento ADD COLUMN gerente_id INT NULL, ADD FOREIGN KEY (gerente_id) REFERENCES empleado(id);`. No toques la base `ecotech` sin respaldo.
+
+**2. El empleado muestra su departamento.** `Empleado.mostrar_datos()` agrega al final `Departamento: Soporte (ID 1)` o `Departamento: Sin departamento`. Para eso, `EmpleadoDAO.listar()` y `buscar_por_id()` ahora usan `LEFT JOIN departamento`: el `LEFT` hace que un empleado **sin** departamento igual aparezca (con las columnas del departamento en `None`). Con ese dato, el mismo `listar()` (y `buscar_por_id()`) arma el `Departamento` y llama a `agregar_empleado()` para que la referencia y la colección cuenten la misma relación.
+
+#### Lo que enseña la Clase 5, aplicado a EcoTech
+
+| Paso de la clase | Dónde está | Qué hace |
+|---|---|---|
+| Paso 1–2: referencia `departamento` | `Empleado.__init__` (ya existía) | Empieza en `None`; se puede leer con `ana.departamento.nombre`. |
+| Paso 5: validar con una propiedad | `Empleado.departamento` (`@property` y `@departamento.setter`) | Acepta un `Departamento` o `None`; cualquier otro valor lanza `ValueError("Asigna un Departamento o None.")`. Es el mismo molde de `nombre` y `correoElectronico`. |
+| Paso 3: colección `_empleados` | `Departamento` (ya existía) | La propiedad `empleados` devuelve una tupla. |
+| Paso 4: `agregar_empleado()` | `Departamento` (ya existía, con más controles) | Coordina `empleado.departamento = self` y la lista, sin duplicar. |
+| Paso 6: guardar la asignación | `asignar_departamento()` + `EmpleadoDAO.actualizar_departamento()` | `UPDATE empleado SET departamento_id = ? WHERE id = ?`; el menú confirma con `filas == 1`. |
+| Paso 7: reconstruir | `DepartamentoDAO.reconstruir_departamento(filas)` | Arma el `Departamento` y le agrega un `Empleado` por cada fila válida. Cada fila trae 10 columnas: las tres primeras son del departamento (`id`, `nombre`, `gerente_id`) y por eso van los tres `_` en el `for`; las demás son del empleado. Si hay `gerente_id`, el gerente se recupera con `EmpleadoDAO.buscar_por_id()`. |
+| Paso 8: usar los objetos | `mostrar_departamento()` | Distingue «no existe» (`None`) de «existe sin empleados» (colección vacía). |
+| Reporte general | `ReporteEmpleados.generar()` | Devuelve texto con todos los empleados y su departamento. |
+| Herencia | `ReportePorDepartamento(ReporteEmpleados)` | `super().__init__(departamento.empleados)` reutiliza el constructor; solo cambia el título. |
+| Polimorfismo | `imprimir_reportes(empleados, departamento)` | Un `for reporte in reportes: print(reporte.generar())` sirve para ambos reportes. `mostrar_reportes()` recupera los datos y la llama. |
+
+**Las clases nuevas de la Clase 5 son `ReporteEmpleados` y `ReportePorDepartamento`** (`dominio/reporte.py`). Las diapositivas las conectan como «opciones 7 y 8» porque su menú es más corto; en EcoTech esas opciones ya estaban ocupadas por el CRUD, así que quedaron como 10, 11 y 12.
+
+**Menú de empleados, opciones nuevas:** **10** asignar departamento (si el empleado ya estaba en otro, lo mueve con `reasignarEmpleado()`), **11** mostrar un departamento con sus empleados, **12** mostrar reportes.
+
+**Reglas que se mantienen:** un empleado pertenece a un solo departamento (0..1); no se puede guardar una asignación a un departamento que no existe (la FK lo rechaza); y un departamento con empleados no se puede eliminar.
+
+**Import circular (y cómo se resolvió):** con el Paso 5, `empleado.py` importa `Departamento` arriba del archivo, igual que la diapositiva. `departamento.py` ya no importa `Empleado` arriba; lo importa **dentro** de `validarGerente()` y de `agregar_empleado()`. Así Python solo lo busca cuando esas funciones se ejecutan, y los dos archivos no se esperan entre sí al cargarse. Confírmalo con el profesor si él prefiere otra forma.
+
+#### Semillas: datos de ejemplo que no se duplican
+
+Una **semilla** es un conjunto de datos iniciales que se inserta para poder repetir las pruebas. El problema: la lista en memoria no sabe qué ya existe en la base de datos, así que cargar dos veces duplicaría todo. La solución es **preguntar antes de insertar** (`SELECT` y luego `INSERT` solo si no existe), el mismo patrón de `EmpleadoProyectoDAO.asignar()`.
+
+| Dato | Cómo se reconoce que ya existe |
+|---|---|
+| Departamento | Por su **nombre** (`SELECT id FROM departamento WHERE nombre = ?`). |
+| Empleado | Por su **correo** (`SELECT id FROM empleado WHERE correo = ?`). |
+
+- **Dónde:** `persistencia/semillas.py`. **Cómo se ejecuta:** `python src/main.py` y la opción **6. Cargar datos de ejemplo (semillas)** del menú principal.
+- **Qué carga:** 2 departamentos (Soporte y Desarrollo), 3 empleados (Ana Torres y Luis Soto en Soporte; María Pérez en Desarrollo) y un gerente para cada departamento (Ana y María).
+- **Orden:** primero los empleados (sin departamento), luego los departamentos con su gerente y al final se asigna cada empleado a su departamento. Es el orden que exigen las dos llaves foráneas.
+- **Solo lo que falta:** la asignación se hace únicamente a los empleados que se insertaron en esa ejecución. Si después mueves a Luis a Desarrollo, volver a cargar las semillas **no** lo devuelve a Soporte.
+- **Prueba de las dos ejecuciones:** la primera muestra «Semillas cargadas: 2 departamentos y 3 empleados nuevos.» y la segunda «Las semillas ya estaban cargadas; no se duplicó ningún dato.». Después usa Empleados → opción 2 (listar) y opción 11 (mostrar departamento) para recuperar los objetos.
+- **Límite conocido:** las tablas no tienen restricción `UNIQUE` en `correo` ni en `nombre`; la protección contra duplicados está en el código de las semillas, no en la base de datos. Agregar `UNIQUE` sería una mejora futura y cambia el esquema.
+
+**Prueba de la clase «reiniciar y recuperar»:** 1) menú de empleados, opción 10, asigna a Ana a Soporte; 2) sal con `0`; 3) vuelve a ejecutar `python src/main.py`, entra a Empleados y usa la opción 3 o la 11. La relación reaparece **sin una nueva inserción**: la guarda la FK `departamento_id`, y la reconstruyen `EmpleadoDAO.listar()`/`buscar_por_id()` y `DepartamentoDAO.reconstruir_departamento()`.
+
+**Preguntas de recuperación activa:**
+
+- ¿Por qué `listar()` usa `LEFT JOIN` y no `JOIN`? ¿Qué empleados desaparecerían con `JOIN`?
+- ¿Cuál es la diferencia entre `buscar_con_empleados()` devolviendo `None` y devolviendo un departamento con `empleados == ()`?
+- ¿Qué hacen los dos `_` en `for _, _, _, id_emp, ... in filas`?
+- ¿Qué parte de `ReportePorDepartamento` se hereda y cuál se cambia?
+- **Feynman:** explícale a un compañero, en tres frases, cómo recupera la aplicación a Ana en Soporte después de cerrar y abrir.
+- **Palacio de la memoria:** deja en tu casa tres objetos: la referencia `ana.departamento` (puerta), la colección `soporte._empleados` (sala) y la FK `departamento_id` (caja fuerte). Los dos primeros desaparecen al apagar la luz (memoria); la caja fuerte se queda (base de datos).
+
+---
+
 ## 5. UML definitivo: clases, atributos, relaciones y estado
 
 El diagrama se conserva en tres vistas: **(1) modelo de clases**, **(2) relaciones de Informe y autorización** y **(3) constructores, accesores y validaciones**. Es el contrato principal para continuar.
@@ -423,7 +508,7 @@ El diagrama se conserva en tres vistas: **(1) modelo de clases**, **(2) relacion
 | Clase del UML | Contenido | Estado actual |
 |---|---|---|
 | **Empleado** | `idEmpleado`, `nombre`, `direccion`, `telefono`, `correoElectronico`, `fechaInicioContrato`, `salario`; getters, cambios y asignaciones a proyectos. | Implementación funcional del dominio, validadores, persistencia y **CRUD completo** (actualiza nombre, dirección, teléfono, correo y salario). `id` representa técnicamente `idEmpleado`. |
-| **Departamento** | `nombre`, `gerente`, asociación a empleados, operaciones de asignación y gestión. | Objeto, lista de empleados, asignación/reasignación y **CRUD SQL** (registrar, listar, buscar, actualizar nombre y gerente, eliminar, asignar y quitar empleados). Los métodos del UML `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento` y `eliminarDepartamento` **siguen sin existir como métodos de la clase**: su función la cumplen hoy el DAO y el menú. |
+| **Departamento** | `nombre`, `gerente`, asociación a empleados, operaciones de asignación y gestión. | Objeto, lista de empleados, asignación/reasignación y **CRUD SQL** (registrar, listar, buscar, actualizar nombre y gerente (un empleado o vacío), eliminar, asignar y quitar empleados). Los métodos del UML `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento` y `eliminarDepartamento` **siguen sin existir como métodos de la clase**: su función la cumplen hoy el DAO y el menú. |
 | **Proyecto** | `nombre`, `descripcion`, `fechaInicio`, operaciones de creación/modificación/eliminación previstas. | Objeto, cambios de atributos y **CRUD SQL** (registrar, listar, buscar, actualizar nombre, descripción y fecha, eliminar). Los métodos `crearProyecto`, `modificarProyecto` y `eliminarProyecto` **siguen sin existir como métodos de la clase**: los cubren el DAO y el menú. |
 | **RegistroTiempo** | `fecha`, `horasTrabajadas`, `descripcionTarea`, relación con Empleado y Proyecto. | Objeto, validaciones, asociación, inserción condicionada a proyecto asignado y **CRUD SQL** (listar, buscar, actualizar fecha/horas/tarea, eliminar). |
 | **Informe** | Generar informes de empleados, departamentos, proyectos y registros de tiempo; recibe `ControlAcceso`. | **Pendiente** en Python. |
@@ -459,7 +544,7 @@ El modelo tampoco utiliza `ON DELETE CASCADE` para borrar automáticamente esas 
 
 | Tabla | Datos esenciales | Relación |
 |---|---|---|
-| `departamento` | `id`, `nombre`, `gerente` | Departamento independiente; empleado puede referenciarlo. |
+| `departamento` | `id`, `nombre`, `gerente_id` | `gerente_id` es FK opcional a `empleado`; el empleado puede referenciar al departamento. |
 | `empleado` | `id`, `nombre`, `direccion`, `telefono`, `correo`, `fecha_inicio_contrato`, `salario`, `departamento_id` | `departamento_id` es FK opcional. |
 | `proyecto` | `id`, `nombre`, `descripcion`, `fecha_inicio` | Entidad de proyectos. |
 | `empleado_proyecto` | `empleado_id`, `proyecto_id` | Tabla puente N:M, PK compuesta y dos FK. |
@@ -471,8 +556,9 @@ El modelo tampoco utiliza `ON DELETE CASCADE` para borrar automáticamente esas 
 |---|---|---|
 | `conexion.py` | `obtener_motor()`, `abrir_conexion()` | Configura SQLite/MySQL. |
 | `creacion_bd.py` | `crear_tablas()` | Revisa tablas existentes y crea las cinco tablas. No migra bases antiguas. |
-| `empleado_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()` | CRUD completo; `actualizar()` guarda nombre, dirección, teléfono, correo y salario. |
-| `departamento_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()`, `asignar_empleado()`, `quitar_empleado()`, `listar_empleados()` | CRUD y pertenencia de empleados al departamento. |
+| `empleado_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `actualizar_departamento()`, `eliminar()` | CRUD completo; `actualizar()` guarda nombre, dirección, teléfono, correo y salario. `listar()` y `buscar_por_id()` traen también el departamento (Clase 5). |
+| `departamento_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()`, `asignar_empleado()`, `quitar_empleado()`, `listar_empleados()`, `buscar_con_empleados()`, `reconstruir_departamento()` | CRUD, pertenencia de empleados y carga de un departamento con su colección de empleados (Clase 5). |
+| `semillas.py` | `cargar_semillas()`, `buscar_id_departamento()`, `buscar_id_empleado()` | Carga 2 departamentos y 3 empleados de ejemplo **solo si no existen** (busca por nombre y por correo antes de insertar). Se usa desde la opción 6 del menú principal. |
 | `proyecto_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()` | CRUD completo. |
 | `empleado_proyecto_dao.py` | `asignar()`, `desasignar()`, `listar_por_empleado()`, `listar_por_proyecto()` | Persistencia de la relación N:M, quitar asignaciones y lectura de ambas direcciones. |
 | `registro_tiempo_dao.py` | `insertar()`, `listar()`, `buscar_por_id()`, `actualizar()`, `eliminar()`, `reconstruir()` | Inserta solo cuando hay una asignación válida; actualiza fecha, horas y tarea. |
@@ -569,6 +655,7 @@ Abre el **menú principal** con todas las entidades:
 3. Proyectos
 4. Asignaciones
 5. Registros de tiempo
+6. Cargar datos de ejemplo (semillas)
 0. Salir
 ```
 
@@ -584,6 +671,9 @@ La opción **1. Empleados** abre el menú de empleados, cuyas opciones son:
 7. Actualizar teléfono
 8. Actualizar nombre
 9. Actualizar salario
+10. Asignar departamento
+11. Mostrar departamento con empleados
+12. Mostrar reportes
 0. Salir
 ```
 
@@ -614,7 +704,7 @@ python -m compileall -q src
 python -m unittest discover -s tests -v
 ```
 
-La versión actual contiene **64 pruebas**: 44 en `tests/test_ecotech.py` y 20 en `tests/test_crud.py`. En el entorno de revisión (Linux) se comprobó **64/64 `OK` en SQLite**. Las 44 originales ya las confirmaste en tu computador Windows (antes del ajuste de 4 pruebas de menú); **ni ese ajuste ni las 20 nuevas se han ejecutado todavía en Windows**. Además, el CRUD completo se recorrió contra MariaDB 10.11 con PyMySQL en una base nueva. Nada de esto sustituye una prueba real con MySQL/WampServer.
+La versión actual contiene **94 pruebas**: 44 en `tests/test_ecotech.py`, 20 en `tests/test_crud.py` y 30 en `tests/test_clase5.py`. En esta revisión se ejecutaron las tres suites por separado y en conjunto en SQLite/Linux: **94/94 `OK`** (44 `test_ecotech.py`, 20 `test_crud.py` y 30 `test_clase5.py`). La ejecución local en Windows y la comprobación de esta versión contra MySQL/WampServer siguen pendientes. El README conserva el antecedente de una prueba previa con MariaDB 10.11; no se considera una validación de tu instalación WampServer.
 
 Las pruebas cubren, entre otros aspectos:
 
@@ -774,7 +864,11 @@ En particular, conservar `docs/audt_diagr/ALCANCE_Y_AUDITORIA.md`, el UML final,
 3. **Métodos del UML en las clases de dominio:** `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento`, `eliminarDepartamento`, `crearProyecto`, `modificarProyecto` y `eliminarProyecto` siguen sin existir como métodos; su función la cumplen el DAO y los menús.
 4. **Otras clases del UML:** `Informe`, `CuentaUsuario` y `ControlAcceso`, con sus comportamientos y validaciones, cuando corresponda al curso.
 5. **Prueba real en MySQL/WampServer:** apertura de conexión, creación del esquema, `INSERT`/`SELECT`, relaciones, errores de integridad y operaciones CRUD. No se afirma que esté realizada.
-6. **Publicación de la ampliación:** las 44 pruebas originales en Windows y la fusión de Git ya fueron confirmadas por el estudiante; la rama `main` se verificó en el commit `49432e9`. **El CRUD completo y este README todavía requieren ejecutar las 64 pruebas en Windows, copiarse y publicarse** mediante los comandos de la sección 9. Se debe comprobar el resultado final de ese push.
+6. **Publicación de la ampliación:** las 44 pruebas originales en Windows y la fusión de Git ya fueron confirmadas por el estudiante; la rama `main` se verificó en el commit `03308d6`. **La Clase 5 todavía requiere ejecutar las 94 pruebas en Windows, copiarse y publicarse** mediante los comandos de la sección 9. Se debe comprobar el resultado final de ese push.
+
+7. **Semillas:** implementadas en `persistencia/semillas.py` (ver «Semillas» en la sección de la Clase 5). Falta que expliques el resultado al profesor y las pruebes en tu Windows y en MySQL/WampServer.
+8. **`@property departamento`:** implementada (Paso 5). Confirma con el profesor la forma de evitar el import circular.
+9. **Próxima clase según el profesor:** revisión de semillas y avance hacia Usuario e inicio de sesión (`CuentaUsuario` y `ControlAcceso` del UML).
 
 ### Criterio para los próximos avances
 

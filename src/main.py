@@ -18,7 +18,7 @@ from presentacion.menu_principal import menu_principal
 def demostrar_relaciones():
     # Demo de clases anteriores. Se ejecuta SOLO con --demo.
     # Conserva Departamento, Proyecto, asociación N:M y RegistroTiempo.
-    departamento = Departamento("Desarrollo", "Javier Ahumada")
+    departamento = Departamento("Desarrollo")
     DepartamentoDAO.insertar(departamento)
 
     proyecto = Proyecto("EcoTech", "Gestión de empleados", date(2026, 11, 10))

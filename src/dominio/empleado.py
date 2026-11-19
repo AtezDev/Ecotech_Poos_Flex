@@ -1,5 +1,6 @@
 from datetime import date
 from math import isfinite
+from dominio.departamento import Departamento
 from dominio.proyecto import Proyecto
 
 
@@ -123,6 +124,16 @@ class Empleado:
         self._correoElectronico = self.validar_correo(nuevo_correo)
 
     @property
+    def departamento(self):
+        return self._departamento
+
+    @departamento.setter
+    def departamento(self, valor):
+        if valor is not None and not isinstance(valor, Departamento):
+            raise ValueError("Asigna un Departamento o None.")
+        self._departamento = valor
+
+    @property
     def correo(self):
         return self.correoElectronico
 
@@ -221,7 +232,12 @@ class Empleado:
         return True
 
     def mostrar_datos(self):
+        if self.departamento is None:
+            texto_departamento = "Sin departamento"
+        else:
+            texto_departamento = f"{self.departamento.nombre} (ID {self.departamento.id})"
         return (f"ID: {self.id} | Nombre: {self.nombre} | "
                 f"Dirección: {self.direccion} | Teléfono: {self.telefono} | "
                 f"Correo: {self.correoElectronico} | "
-                f"Contrato: {self.fechaInicioContrato} | Salario: {self.salario}")
+                f"Contrato: {self.fechaInicioContrato} | Salario: {self.salario} | "
+                f"Departamento: {texto_departamento}")

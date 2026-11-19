@@ -1,7 +1,9 @@
 import sqlite3
 from datetime import date
 from dominio.empleado import Empleado
+from dominio.reporte import ReporteEmpleados, ReportePorDepartamento
 from persistencia.conexion import obtener_motor
+from persistencia.departamento_dao import DepartamentoDAO
 from persistencia.empleado_dao import EmpleadoDAO
 
 
@@ -279,6 +281,105 @@ def actualizar_salario():
             print("No hubo cambios en la BD; consulta el ID otra vez.")
 
 
+def seleccionar_departamento():
+    _, OperationalError = tipos_errores_bd()
+    try:
+        departamentos = DepartamentoDAO.listar()
+        if not departamentos:
+            print("Primero registra un departamento.")
+            return None
+        for departamento in departamentos:
+            print(departamento.mostrar_datos())
+        departamento = DepartamentoDAO.buscar_por_id(solicitar_id_de("departamento"))
+    except OperationalError:
+        print("No se pudo consultar la base de datos.")
+        return None
+    if departamento is None:
+        print("No existe ese departamento.")
+    return departamento
+
+
+def asignar_departamento():
+    empleado = EmpleadoDAO.buscar_por_id(solicitar_id_de("empleado"))
+
+    if empleado is None:
+        print("No existe ese empleado.")
+        return
+
+    departamento = seleccionar_departamento()
+
+    if departamento is None:
+        return
+
+    if empleado.departamento is not None and empleado.departamento.id == departamento.id:
+        print("El empleado ya pertenece a ese departamento.")
+        return
+
+    IntegrityError, OperationalError = tipos_errores_bd()
+    try:
+        if empleado.departamento is None:
+            departamento.agregar_empleado(empleado)
+        else:
+            empleado.departamento.reasignarEmpleado(empleado, departamento)
+        filas = EmpleadoDAO.actualizar_departamento(empleado)
+    except IntegrityError:
+        print("No se pudo guardar: revisa las restricciones de la BD.")
+    except OperationalError:
+        print("No se pudo completar la asignación.")
+    else:
+        if filas == 1:
+            print("Asignación guardada.")
+        else:
+            print("Consulta nuevamente para comprobar el resultado.")
+
+
+def mostrar_departamento():
+    id_dep = solicitar_id_de("departamento")
+    _, OperationalError = tipos_errores_bd()
+    try:
+        departamento = DepartamentoDAO.buscar_con_empleados(id_dep)
+    except OperationalError:
+        print("No se pudo consultar la base de datos.")
+        return
+
+    if departamento is None:
+        print("No existe ese departamento.")
+        return
+
+    print(departamento.mostrar_datos())
+
+    if not departamento.empleados:
+        print("Este departamento no tiene empleados.")
+    for empleado in departamento.empleados:
+        print(f"{empleado.id}: {empleado.nombre}")
+
+
+def imprimir_reportes(empleados, departamento):
+    reportes = [
+        ReporteEmpleados(empleados),
+        ReportePorDepartamento(departamento),
+    ]
+    for reporte in reportes:
+        print(reporte.generar())
+
+
+def mostrar_reportes():
+    _, OperationalError = tipos_errores_bd()
+    try:
+        empleados = EmpleadoDAO.listar()
+        id_dep = solicitar_id_de("departamento")
+        departamento = DepartamentoDAO.buscar_con_empleados(id_dep)
+    except OperationalError:
+        print("No se pudo consultar la base de datos.")
+        return
+
+    if departamento is None:
+        print("No existe ese departamento.")
+        return
+
+    imprimir_reportes(empleados, departamento)
+
+
 def menu_empleados():
     # Menú del docente: while True mantiene viva la aplicación hasta la opción 0.
     while True:
@@ -286,7 +387,9 @@ def menu_empleados():
         print("1. Registrar\n2. Listar\n3. Buscar por ID")
         print("4. Actualizar correo\n5. Eliminar")
         print("6. Actualizar dirección\n7. Actualizar teléfono")
-        print("8. Actualizar nombre\n9. Actualizar salario\n0. Salir")
+        print("8. Actualizar nombre\n9. Actualizar salario")
+        print("10. Asignar departamento\n11. Mostrar departamento con empleados")
+        print("12. Mostrar reportes\n0. Salir")
         opcion = input("Opción: ").strip()
         if opcion == "1":
             crear_empleado()
@@ -306,8 +409,14 @@ def menu_empleados():
             actualizar_nombre()
         elif opcion == "9":
             actualizar_salario()
+        elif opcion == "10":
+            asignar_departamento()
+        elif opcion == "11":
+            mostrar_departamento()
+        elif opcion == "12":
+            mostrar_reportes()
         elif opcion == "0":
             print("Saliendo de EcoTech.")
             break  # Sale del while, no de toda la computadora.
         else:
-            print("Elige una opción entre 0 y 9.")
+            print("Elige una opción entre 0 y 12.")

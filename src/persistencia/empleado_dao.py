@@ -1,4 +1,5 @@
 from datetime import date
+from dominio.departamento import Departamento
 from dominio.empleado import Empleado
 from persistencia.conexion import abrir_conexion, obtener_motor
 
@@ -37,17 +38,24 @@ class EmpleadoDAO:
         conexion = abrir_conexion()
         try:
             cursor = conexion.cursor()
-            cursor.execute("""SELECT id, nombre, direccion, telefono, correo,
-                           fecha_inicio_contrato, salario FROM empleado ORDER BY id""")
+            cursor.execute("""SELECT e.id, e.nombre, e.direccion, e.telefono, e.correo,
+                           e.fecha_inicio_contrato, e.salario, d.id, d.nombre
+                           FROM empleado e LEFT JOIN departamento d
+                           ON e.departamento_id = d.id ORDER BY e.id""")
             filas = cursor.fetchall()  # fetchall() devuelve todas las filas.
         finally:
             conexion.close()
 
         empleados = []
-        for id_empleado, nombre, direccion, telefono, correo, fecha, salario in filas:
-            empleados.append(Empleado(nombre, direccion, telefono, correo,
-                                      date.fromisoformat(str(fecha)), float(salario),
-                                      id=id_empleado))
+        for (id_empleado, nombre, direccion, telefono, correo, fecha, salario,
+             id_departamento, nombre_departamento) in filas:
+            empleado = Empleado(nombre, direccion, telefono, correo,
+                                date.fromisoformat(str(fecha)), float(salario),
+                                id=id_empleado)
+            if id_departamento is not None:
+                departamento = Departamento(nombre_departamento, id=id_departamento)
+                departamento.agregar_empleado(empleado)
+            empleados.append(empleado)
         return empleados  # Devuelve [] cuando la tabla está vacía.
 
     @staticmethod
@@ -56,18 +64,44 @@ class EmpleadoDAO:
         try:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
-            sql = f"""SELECT id, nombre, direccion, telefono, correo,
-                      fecha_inicio_contrato, salario FROM empleado
-                      WHERE id = {marcador}"""
+            sql = f"""SELECT e.id, e.nombre, e.direccion, e.telefono, e.correo,
+                      e.fecha_inicio_contrato, e.salario, d.id, d.nombre
+                      FROM empleado e LEFT JOIN departamento d
+                      ON e.departamento_id = d.id WHERE e.id = {marcador}"""
             cursor.execute(sql, (id_empleado,))  # La coma forma una tupla de un valor.
             fila = cursor.fetchone()             # Un empleado, o None.
         finally:
             conexion.close()
         if fila is None:
             return None
-        id_encontrado, nombre, direccion, telefono, correo, fecha, salario = fila
-        return Empleado(nombre, direccion, telefono, correo,
-                        date.fromisoformat(str(fecha)), float(salario), id=id_encontrado)
+        (id_encontrado, nombre, direccion, telefono, correo, fecha, salario,
+         id_departamento, nombre_departamento) = fila
+        empleado = Empleado(nombre, direccion, telefono, correo,
+                            date.fromisoformat(str(fecha)), float(salario),
+                            id=id_encontrado)
+        if id_departamento is not None:
+            departamento = Departamento(nombre_departamento, id=id_departamento)
+            departamento.agregar_empleado(empleado)
+        return empleado
+
+    @staticmethod
+    def actualizar_departamento(empleado):
+        if empleado.id is None:
+            raise ValueError("Primero debes guardar el empleado.")
+        if empleado.departamento is not None and empleado.departamento.id is None:
+            raise ValueError("Primero debes guardar el departamento.")
+        conexion = abrir_conexion()
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            departamento_id = empleado.departamento.id if empleado.departamento is not None else None
+            sql = f"UPDATE empleado SET departamento_id = {marcador} WHERE id = {marcador}"
+            cursor.execute(sql, (departamento_id, empleado.id))
+            filas = cursor.rowcount
+            conexion.commit()
+            return filas
+        finally:
+            conexion.close()
 
     @staticmethod
     def actualizar(empleado):

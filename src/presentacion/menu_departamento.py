@@ -1,16 +1,40 @@
 from dominio.departamento import Departamento
 from persistencia.departamento_dao import DepartamentoDAO
+from persistencia.empleado_dao import EmpleadoDAO
 from presentacion.menu_comun import (eliminar_con_confirmacion, buscar_uno, listar_todo,
                                      validar_texto_obligatorio)
 from presentacion.menu_empleado import solicitar, solicitar_id_de, tipos_errores_bd
 
 
+def seleccionar_gerente():
+    empleados = EmpleadoDAO.listar()
+    if not empleados:
+        print("Todavía no hay empleados registrados: el departamento quedará sin gerente.")
+        print("Cuando registres empleados, asigna el gerente con la opción 5.")
+        return None
+    print("El gerente es un empleado ya registrado. Empleados disponibles:")
+    for empleado in empleados:
+        print(f"  {empleado.id}: {empleado.nombre}")
+    while True:
+        texto = input("ID del gerente (Enter para dejarlo sin gerente): ").strip()
+        if texto == "":
+            return None
+        if not texto.isdigit():
+            print("Escribe solo el número de ID del empleado.")
+        else:
+            gerente = EmpleadoDAO.buscar_por_id(int(texto))
+            if gerente is None:
+                print("No existe ningún empleado con ese ID. Elige uno de la lista.")
+            else:
+                return gerente
+
+
 def crear_departamento():
     nombre = solicitar("Nombre", validar_texto_obligatorio)
-    gerente = solicitar("Gerente", validar_texto_obligatorio)
-    departamento = Departamento(nombre, gerente)
     IntegrityError, OperationalError = tipos_errores_bd()
     try:
+        gerente = seleccionar_gerente()
+        departamento = Departamento(nombre, gerente)
         DepartamentoDAO.insertar(departamento)
     except IntegrityError:
         print("No se pudo registrar: revisa las restricciones de la BD.")
@@ -61,8 +85,10 @@ def actualizar_gerente_departamento():
         if departamento is None:
             print("No existe departamento con ese ID.")
             return
-        nuevo = solicitar("Gerente", validar_texto_obligatorio)
-        if nuevo == departamento.obtenerGerente():
+        nuevo = seleccionar_gerente()
+        id_actual = departamento.gerente.id if departamento.gerente is not None else None
+        id_nuevo = nuevo.id if nuevo is not None else None
+        if id_nuevo == id_actual:
             print("El valor es el mismo; no hay cambios.")
             return
         departamento.cambiarGerente(nuevo)

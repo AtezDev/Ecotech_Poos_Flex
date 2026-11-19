@@ -1,21 +1,24 @@
-from dominio.empleado import Empleado
-
 
 class Departamento:
-    def __init__(self, nombre, gerente, id=None):
+    def __init__(self, nombre, gerente=None, id=None):
         # Atributos de Departamento según el UML.
         if not self.validarNombre(nombre):
             raise ValueError("El nombre del departamento es obligatorio.")
-        if not isinstance(gerente, str) or not gerente.strip():
-            raise ValueError("El gerente es obligatorio.")
+        if not self.validarGerente(gerente):
+            raise ValueError("El gerente debe ser un empleado o quedar vacío.")
         self.id = id
         self.nombre = nombre.strip()
-        self.gerente = gerente.strip()
+        self.gerente = gerente  # Un objeto Empleado, o None si aún no tiene gerente.
         self._empleados = []  # 0..*: varios objetos Empleado.
 
     @staticmethod
     def validarNombre(nombre):
         return isinstance(nombre, str) and bool(nombre.strip())
+
+    @staticmethod
+    def validarGerente(gerente):
+        from dominio.empleado import Empleado
+        return gerente is None or isinstance(gerente, Empleado)
 
     def obtenerNombre(self):
         return self.nombre
@@ -30,9 +33,9 @@ class Departamento:
         return self.gerente
 
     def cambiarGerente(self, nuevoGerente):
-        if not isinstance(nuevoGerente, str) or not nuevoGerente.strip():
+        if not self.validarGerente(nuevoGerente):
             return False
-        self.gerente = nuevoGerente.strip()
+        self.gerente = nuevoGerente
         return True
 
     @property
@@ -44,6 +47,7 @@ class Departamento:
         return len(self._empleados)
 
     def agregar_empleado(self, empleado):
+        from dominio.empleado import Empleado
         # Un empleado puede pertenecer como máximo a un Departamento.
         if not isinstance(empleado, Empleado) or empleado in self._empleados:
             return False
@@ -71,4 +75,8 @@ class Departamento:
         return False
 
     def mostrar_datos(self):
-        return f"ID: {self.id} | Departamento: {self.nombre} | Gerente: {self.gerente}"
+        if self.gerente is None:
+            texto_gerente = "Sin gerente"
+        else:
+            texto_gerente = f"{self.gerente.nombre} (ID {self.gerente.id})"
+        return f"ID: {self.id} | Departamento: {self.nombre} | Gerente: {texto_gerente}"

@@ -96,8 +96,8 @@ class TestEcoTech(unittest.TestCase):
         self.assertEqual(self.empleado().salario,950000.0)
 
     def test_11_department_unique(self):
-        d1=Departamento('Desarrollo','Javier')
-        d2=Departamento('RRHH','Karla')
+        d1=Departamento('Desarrollo')
+        d2=Departamento('RRHH')
         e=self.empleado()
         self.assertTrue(d1.asignarEmpleado(e))
         self.assertFalse(d1.asignarEmpleado(e))
@@ -106,8 +106,8 @@ class TestEcoTech(unittest.TestCase):
         self.assertEqual(d1.cantidad_empleados(),1)
 
     def test_12_department_transfer(self):
-        d1=Departamento('Desarrollo','Javier')
-        d2=Departamento('RRHH','Karla')
+        d1=Departamento('Desarrollo')
+        d2=Departamento('RRHH')
         e=self.empleado()
         d1.asignarEmpleado(e)
         self.assertTrue(d1.reasignarEmpleado(e,d2))
@@ -116,9 +116,9 @@ class TestEcoTech(unittest.TestCase):
         self.assertIs(e.departamento,d2)
 
     def test_13_departments_and_projects_validate(self):
-        with self.assertRaises(ValueError):Departamento('  ','J')
+        with self.assertRaises(ValueError):Departamento('  ')
         with self.assertRaises(ValueError):Proyecto(' ','Desc',self.fecha)
-        d=Departamento('Ventas','Javier')
+        d=Departamento('Ventas')
         self.assertFalse(d.cambiarNombre(''))
         p=self.proyecto()
         self.assertTrue(p.cambiarDescripcion('Mejorada'))
@@ -130,7 +130,7 @@ class TestEcoTech(unittest.TestCase):
         self.assertFalse(RegistroTiempo(self.fecha,1,'Tarea').registrarTiempo(self.fecha,1,'Tarea','No es Empleado',self.proyecto()))
 
     def test_15_insert_ids(self):
-        d=Departamento('Desarrollo','Javier')
+        d=Departamento('Desarrollo')
         p=self.proyecto()
         e=self.empleado()
         self.assertIsNone(e.id)

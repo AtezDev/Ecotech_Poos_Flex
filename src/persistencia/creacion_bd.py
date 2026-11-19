@@ -10,7 +10,7 @@ def crear_tablas():
 
         # Las cinco tablas representan las clases y relaciones implementadas.
         columnas_requeridas = {
-            "departamento": {"id", "nombre", "gerente"},
+            "departamento": {"id", "nombre", "gerente_id"},
             "proyecto": {"id", "nombre", "descripcion", "fecha_inicio"},
             "empleado": {"id", "nombre", "direccion", "telefono", "correo",
                          "fecha_inicio_contrato", "salario", "departamento_id"},
@@ -47,7 +47,8 @@ def crear_tablas():
                 """CREATE TABLE IF NOT EXISTS departamento (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nombre TEXT NOT NULL,
-                    gerente TEXT NOT NULL
+                    gerente_id INTEGER,
+                    FOREIGN KEY (gerente_id) REFERENCES empleado(id)
                 )""",
                 """CREATE TABLE IF NOT EXISTS proyecto (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,7 +90,8 @@ def crear_tablas():
                 """CREATE TABLE IF NOT EXISTS departamento (
                     id INT PRIMARY KEY AUTO_INCREMENT,
                     nombre VARCHAR(100) NOT NULL,
-                    gerente VARCHAR(100) NOT NULL
+                    gerente_id INT,
+                    FOREIGN KEY (gerente_id) REFERENCES empleado(id)
                 ) ENGINE=InnoDB""",
                 """CREATE TABLE IF NOT EXISTS proyecto (
                     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -128,8 +130,14 @@ def crear_tablas():
             ]
 
         # Ejecutamos el SQL y confirmamos la creación con commit().
+        # departamento y empleado se apuntan entre sí (gerente_id y departamento_id).
+        # En MySQL apagamos un momento la revisión para poder crear la primera tabla.
+        if motor == "mysql":
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
         for sql in tablas:
             cursor.execute(sql)
+        if motor == "mysql":
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
 
         conexion.commit()
     finally:

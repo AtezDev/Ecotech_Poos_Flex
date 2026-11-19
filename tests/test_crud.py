@@ -41,7 +41,7 @@ class TestCrud(unittest.TestCase):
         return ProyectoDAO.insertar(Proyecto(nombre, 'Gestión de empleados', self.fecha))
 
     def departamento(self, nombre='Desarrollo'):
-        return DepartamentoDAO.insertar(Departamento(nombre, 'Javier Ahumada'))
+        return DepartamentoDAO.insertar(Departamento(nombre))
 
     def gestion(self, *lineas):
         entrada = '\n'.join(lineas) + '\n'
@@ -95,10 +95,16 @@ class TestCrud(unittest.TestCase):
         self.assertEqual(DepartamentoDAO.buscar_por_id(d.id).nombre, 'Desarrollo')
         self.assertIsNone(DepartamentoDAO.buscar_por_id(999))
         d.cambiarNombre('Operaciones')
-        d.cambiarGerente('Marta Rojas')
+        self.assertFalse(d.cambiarGerente('Marta Rojas'))
+        gerente = self.empleado()
+        self.assertTrue(d.cambiarGerente(gerente))
         self.assertEqual(DepartamentoDAO.actualizar(d), 1)
         g = DepartamentoDAO.buscar_por_id(d.id)
-        self.assertEqual((g.nombre, g.gerente), ('Operaciones', 'Marta Rojas'))
+        self.assertEqual((g.nombre, g.gerente.id, g.gerente.nombre),
+                         ('Operaciones', gerente.id, 'Ana Torres'))
+        d.cambiarGerente(None)
+        self.assertEqual(DepartamentoDAO.actualizar(d), 1)
+        self.assertIsNone(DepartamentoDAO.buscar_por_id(d.id).gerente)
         self.assertEqual(DepartamentoDAO.eliminar(d.id), 1)
         self.assertEqual(DepartamentoDAO.eliminar(d.id), 0)
 
@@ -192,11 +198,13 @@ class TestCrud(unittest.TestCase):
         self.assertIsNone(RegistroTiempoDAO.buscar_por_id(r.id))
 
     def test_15_menu_departamentos_flujo_completo(self):
-        r = self.gestion('2', '1', 'Desarrollo', '', 'Javier Ahumada',
-                         '2', '3', '1', '4', '1', 'Operaciones', '5', '1', 'Marta Rojas',
+        self.empleado()
+        r = self.gestion('2', '1', 'Desarrollo', 'abc', '99', '1',
+                         '2', '3', '1', '4', '1', 'Operaciones', '5', '1', '',
                          '6', '1', 'n', '6', '1', 's', '0', '0')
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn('Este dato es obligatorio.', r.stdout)
+        self.assertIn('Escribe solo el número de ID', r.stdout)
+        self.assertIn('No existe ningún empleado con ese ID', r.stdout)
         self.assertIn('Departamento registrado. ID: 1', r.stdout)
         self.assertIn('Nombre actualizado correctamente.', r.stdout)
         self.assertIn('Gerente actualizado correctamente.', r.stdout)
