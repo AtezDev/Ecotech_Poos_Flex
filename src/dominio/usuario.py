@@ -32,3 +32,4 @@ class Usuario:
                 f"Use al menos {cls.MIN_CLAVE} caracteres."
             )
         return clave
+
