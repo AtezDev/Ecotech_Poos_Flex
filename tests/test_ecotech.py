@@ -11,6 +11,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 
+COMANDO_MENU = [sys.executable, '-c',
+                "import sys; sys.path.insert(0, r'%s'); "
+                "from presentacion.menu_principal import menu_principal; menu_principal()"
+                % (ROOT / 'src')]
+
 from dominio.empleado import Empleado
 from dominio.departamento import Departamento
 from dominio.proyecto import Proyecto
@@ -315,7 +320,7 @@ class TestEcoTech(unittest.TestCase):
         entrada = "\n".join(["1", "1", "Ana Torres", "La Serena", "abc", "+56912345678",
                              "ana@ecotech.cl", "2026-11-12", "950000", "0", "0", ""])
         env = os.environ.copy()
-        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+        proceso = subprocess.run(COMANDO_MENU,
                                  cwd=self.tmp.name, env=env, input=entrada,
                                  capture_output=True, text=True)
         self.assertEqual(proceso.returncode, 0, proceso.stderr)
@@ -328,7 +333,7 @@ class TestEcoTech(unittest.TestCase):
         e = self.empleado()
         EmpleadoDAO.insertar(e)
         entrada = f"1\n2\n3\n{e.id}\n0\n0\n"
-        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+        proceso = subprocess.run(COMANDO_MENU,
                                  cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
                                  capture_output=True, text=True)
         self.assertEqual(proceso.returncode, 0, proceso.stderr)
@@ -339,7 +344,7 @@ class TestEcoTech(unittest.TestCase):
         e = self.empleado()
         EmpleadoDAO.insertar(e)
         entrada = f"1\n4\n{e.id}\nnuevo@ecotech.cl\n5\n{e.id}\nn\n0\n0\n"
-        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+        proceso = subprocess.run(COMANDO_MENU,
                                  cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
                                  capture_output=True, text=True)
         self.assertEqual(proceso.returncode, 0, proceso.stderr)
@@ -352,7 +357,7 @@ class TestEcoTech(unittest.TestCase):
         entrada = "\n".join(["1", "1", "Ana Torres", "La Serena", "+56912345678",
                              "ana@", "ana@ecotech.cl", "2026-02-30", "2026-11-12",
                              "abc", "950000", "0", "0", ""])
-        proceso = subprocess.run([sys.executable, str(ROOT / "src/main.py")],
+        proceso = subprocess.run(COMANDO_MENU,
                                  cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
                                  capture_output=True, text=True)
         self.assertEqual(proceso.returncode, 0, proceso.stderr)

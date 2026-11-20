@@ -8,7 +8,7 @@ def crear_tablas():
         cursor = conexion.cursor()
         motor = obtener_motor()
 
-        # Las cinco tablas representan las clases y relaciones implementadas.
+        # Las seis tablas representan las clases y relaciones implementadas.
         columnas_requeridas = {
             "departamento": {"id", "nombre", "gerente_id"},
             "proyecto": {"id", "nombre", "descripcion", "fecha_inicio"},
@@ -16,7 +16,8 @@ def crear_tablas():
                          "fecha_inicio_contrato", "salario", "departamento_id"},
             "empleado_proyecto": {"empleado_id", "proyecto_id"},
             "registro_tiempo": {"id", "fecha", "horas_trabajadas", "descripcion_tarea",
-                                "empleado_id", "proyecto_id"}
+                                "empleado_id", "proyecto_id"},
+            "usuario": {"id", "nombre_usuario", "password_hash", "empleado_id"}
         }
         if motor == "mysql":
             cursor.execute("SHOW TABLES")
@@ -83,6 +84,13 @@ def crear_tablas():
                     proyecto_id INTEGER NOT NULL,
                     FOREIGN KEY (empleado_id, proyecto_id)
                         REFERENCES empleado_proyecto(empleado_id, proyecto_id)
+                )""",
+                """CREATE TABLE IF NOT EXISTS usuario (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre_usuario TEXT NOT NULL UNIQUE,
+                    password_hash TEXT NOT NULL,
+                    empleado_id INTEGER NOT NULL UNIQUE,
+                    FOREIGN KEY (empleado_id) REFERENCES empleado(id)
                 )"""
             ]
         else:
@@ -126,6 +134,13 @@ def crear_tablas():
                     proyecto_id INT NOT NULL,
                     FOREIGN KEY (empleado_id, proyecto_id)
                         REFERENCES empleado_proyecto(empleado_id, proyecto_id)
+                ) ENGINE=InnoDB""",
+                """CREATE TABLE IF NOT EXISTS usuario (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    nombre_usuario VARCHAR(40) NOT NULL UNIQUE,
+                    password_hash VARCHAR(100) NOT NULL,
+                    empleado_id INT NOT NULL UNIQUE,
+                    FOREIGN KEY (empleado_id) REFERENCES empleado(id)
                 ) ENGINE=InnoDB"""
             ]
 

@@ -13,6 +13,7 @@ from persistencia.registro_tiempo_dao import RegistroTiempoDAO
 from persistencia.empleado_proyecto_dao import EmpleadoProyectoDAO
 from presentacion.menu_empleado import listar_empleados, tipos_errores_bd
 from presentacion.menu_principal import menu_principal
+from presentacion.menu_usuario import menu_acceso, mostrar_empleado_vinculado
 
 
 def demostrar_relaciones():
@@ -70,7 +71,15 @@ def main():
     elif len(sys.argv) == 2 and sys.argv[1] == "--listar":
         listar_empleados()
     else:
+        usuario_actual = menu_acceso()
+        if usuario_actual is None:
+            return
+        print(f"Sesión: {usuario_actual.nombre_usuario}")
+        if not mostrar_empleado_vinculado(usuario_actual):
+            return
+
         menu_principal()
+        usuario_actual = None
 
 
 if __name__ == "__main__":

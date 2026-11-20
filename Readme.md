@@ -7,6 +7,8 @@
 
 **Estado de GitHub comprobado al preparar esta carpeta:** rama `main`, último commit visible `03308d6` (*Actualizacion CRUD*, 17 de noviembre de 2026). El estudiante confirmó que las **44 pruebas originales terminaron en `OK` en Windows** y que el `push` de la fusión fue exitoso.
 
+**Clase 6 (19 de noviembre):** `Usuario`, `usuario_dao.py`, `servicios/autenticacion.py` (bcrypt), `menu_usuario.py` y login previo al menú principal; 130 pruebas OK en SQLite y sondeo en MariaDB.
+
 **Ampliación de la Clase 5 (17 de noviembre, noche):** el gerente como llave foránea a `empleado` (decisión del profesor), el departamento visible al listar o buscar un empleado, la relación Empleado–Departamento guardada y recuperada (`actualizar_departamento`, `buscar_con_empleados`), y reportes con herencia y polimorfismo (`dominio/reporte.py`). la propiedad `departamento` con setter validado (Paso 5), `imprimir_reportes()` y las **semillas** (`persistencia/semillas.py`, opción 6 del menú principal). Pasaron **94/94 pruebas en SQLite** (Linux) y un recorrido contra MariaDB 10.11 (incluida la llave circular `gerente_id` y las semillas dos veces); **falta ejecutarlas en tu Windows**.
 
 **Ampliación del 17 de noviembre de 2026 (CRUD completo):** se agregan actualización de nombre, dirección, teléfono y salario del empleado, CRUD de Departamento, Proyecto y RegistroTiempo, asignación y cambio de proyecto, y un menú principal que reúne todo (`python src/main.py`). En el entorno de revisión (Linux) pasaron **64/64 pruebas en SQLite** (44 originales, con 4 de ellas ajustadas por el nuevo menú principal, + 20 nuevas) y un recorrido completo del CRUD contra **MariaDB 10.11 con PyMySQL** en una base nueva. **No se ha probado todavía en Windows ni en MySQL de WampServer**: ese paso lo debes hacer tú antes del `push` (sección 8).
@@ -81,7 +83,8 @@ Ecotech_Poos_Flex/
 │   │   ├── departamento.py
 │   │   ├── proyecto.py
 │   │   ├── registro_tiempo.py
-│   │   └── reporte.py                  # Clase 5: reportes (herencia y polimorfismo)
+│   │   ├── reporte.py                  # Clase 5: reportes (herencia y polimorfismo)
+│   │   └── usuario.py                  # Clase 6: cuenta de acceso (asociada a Empleado)
 │   ├── persistencia/                   # Bases de datos y DAO
 │   │   ├── __init__.py
 │   │   ├── conexion.py
@@ -89,9 +92,13 @@ Ecotech_Poos_Flex/
 │   │   ├── empleado_dao.py
 │   │   ├── departamento_dao.py
 │   │   ├── semillas.py                 # Clase 5: datos de ejemplo sin duplicados
+│   │   ├── usuario_dao.py              # Clase 6: insertar y buscar cuentas
 │   │   ├── proyecto_dao.py
 │   │   ├── empleado_proyecto_dao.py
 │   │   └── registro_tiempo_dao.py
+│   ├── servicios/                      # Clase 6: coordina validación, hash y DAO
+│   │   ├── __init__.py
+│   │   └── autenticacion.py            # crear_hash, registrar_usuario, autenticar
 │   └── presentacion/                   # Interacción con el usuario
 │       ├── __init__.py
 │       ├── menu_empleado.py
@@ -100,11 +107,13 @@ Ecotech_Poos_Flex/
 │       ├── menu_proyecto.py
 │       ├── menu_asignacion.py          # Empleado–Proyecto y Empleado–Departamento
 │       ├── menu_registro_tiempo.py
+│       ├── menu_usuario.py             # Clase 6: acceso, login y crear cuenta
 │       └── menu_principal.py           # Menú principal (lo abre python src/main.py)
 ├── tests/
 │   ├── test_ecotech.py                # 44 casos de prueba originales
 │   ├── test_crud.py                   # 20 casos nuevos del CRUD completo
-│   └── test_clase5.py                 # 30 casos de la Clase 5, del gerente y de las semillas
+│   ├── test_clase5.py                 # 30 casos de la Clase 5, del gerente y de las semillas
+│   └── test_clase6.py                 # 36 casos de la Clase 6: usuario, bcrypt y login
 ├── docs/
 │   ├── audt_diagr/
 │   │   ├── Diagrama_Final.drawio       # UML definitivo: 3 vistas
@@ -501,6 +510,28 @@ Una **semilla** es un conjunto de datos iniciales que se inserta para poder repe
 
 ---
 
+### FLEX — Clase 6: Usuario, hash de contraseña y autenticación
+
+Una cuenta (`Usuario`) **se asocia** a un `Empleado`; no hereda de él. Autenticar es comprobar quién eres; autorizar (permisos por rol) queda para la próxima clase.
+
+| Capa | Archivo | Responsabilidad |
+|---|---|---|
+| Dominio | `src/dominio/usuario.py` | Normaliza el usuario (`strip`, minúsculas, 3–40 caracteres ASCII, números, punto o `_`) y valida la clave (mínimo 15, conserva espacios y mayúsculas). |
+| Persistencia | `src/persistencia/usuario_dao.py` | `insertar()` y `buscar_por_nombre()` con SQL parametrizado. |
+| Servicio | `src/servicios/autenticacion.py` | `crear_hash`, `registrar_usuario`, `autenticar`. No usa `input` ni `print`. |
+| Presentación | `src/presentacion/menu_usuario.py` | `solicitar_login`, `registrar_cuenta`, `menu_acceso` (3 intentos) y `mostrar_empleado_vinculado`. |
+| Entrada | `src/main.py` | Sin login correcto no se abre el menú principal. |
+
+**Flujo:** `python src/main.py` → menú de acceso (1 iniciar sesión, 2 crear cuenta, 3 semillas, 0 salir) → si el login es correcto, muestra el empleado vinculado → menú principal.
+
+**Primera cuenta:** opción 3 (semillas) → opción 2 (crear cuenta con el ID de un empleado) → opción 1 (iniciar sesión).
+
+**bcrypt:** se guarda solo el hash (`hashpw` con sal nueva); se compara con `checkpw`. El límite es de 72 bytes UTF-8: se rechaza, no se recorta. Instala con `python -m pip install -r requirements.txt`. La contraseña se pide con `getpass`; en Git Bash puede fallar, usa `winpty python src/main.py`.
+
+**Seguridad:** el mensaje es el mismo si falla el usuario o la clave; si la consulta falla, no hay acceso. Detalle contra la guía en `docs/VERIFICACION_GUIA_REPASO_CLASE6.md`.
+
+---
+
 ## 5. UML definitivo: clases, atributos, relaciones y estado
 
 El diagrama se conserva en tres vistas: **(1) modelo de clases**, **(2) relaciones de Informe y autorización** y **(3) constructores, accesores y validaciones**. Es el contrato principal para continuar.
@@ -549,6 +580,7 @@ El modelo tampoco utiliza `ON DELETE CASCADE` para borrar automáticamente esas 
 | `proyecto` | `id`, `nombre`, `descripcion`, `fecha_inicio` | Entidad de proyectos. |
 | `empleado_proyecto` | `empleado_id`, `proyecto_id` | Tabla puente N:M, PK compuesta y dos FK. |
 | `registro_tiempo` | `id`, `fecha`, `horas_trabajadas`, `descripcion_tarea`, `empleado_id`, `proyecto_id` | FK compuesta a `empleado_proyecto`. |
+| `usuario` | `id`, `nombre_usuario` (UNIQUE), `password_hash`, `empleado_id` (UNIQUE) | Clase 6: FK a `empleado`; guarda solo el hash bcrypt. |
 
 ### Funciones de persistencia disponibles
 
@@ -704,7 +736,7 @@ python -m compileall -q src
 python -m unittest discover -s tests -v
 ```
 
-La versión actual contiene **94 pruebas**: 44 en `tests/test_ecotech.py`, 20 en `tests/test_crud.py` y 30 en `tests/test_clase5.py`. En esta revisión se ejecutaron las tres suites por separado y en conjunto en SQLite/Linux: **94/94 `OK`** (44 `test_ecotech.py`, 20 `test_crud.py` y 30 `test_clase5.py`). La ejecución local en Windows y la comprobación de esta versión contra MySQL/WampServer siguen pendientes. El README conserva el antecedente de una prueba previa con MariaDB 10.11; no se considera una validación de tu instalación WampServer.
+La versión actual contiene **130 pruebas**: 44 en `tests/test_ecotech.py`, 20 en `tests/test_crud.py`, 30 en `tests/test_clase5.py` y 36 en `tests/test_clase6.py`. En esta revisión se ejecutaron en conjunto en SQLite/Linux: **130/130 `OK`**, y la tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución local en Windows y la comprobación de esta versión contra MySQL/WampServer siguen pendientes. El README conserva el antecedente de una prueba previa con MariaDB 10.11; no se considera una validación de tu instalación WampServer.
 
 Las pruebas cubren, entre otros aspectos:
 

@@ -10,6 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 
+COMANDO_MENU = [sys.executable, '-c',
+                "import sys; sys.path.insert(0, r'%s'); "
+                "from presentacion.menu_principal import menu_principal; menu_principal()"
+                % (ROOT / 'src')]
+
 from dominio.empleado import Empleado
 from dominio.departamento import Departamento
 from dominio.proyecto import Proyecto
@@ -45,7 +50,7 @@ class TestCrud(unittest.TestCase):
 
     def gestion(self, *lineas):
         entrada = '\n'.join(lineas) + '\n'
-        return subprocess.run([sys.executable, str(ROOT / 'src/main.py')],
+        return subprocess.run(COMANDO_MENU,
                               cwd=self.tmp.name, env=os.environ.copy(), input=entrada,
                               capture_output=True, text=True)
 
