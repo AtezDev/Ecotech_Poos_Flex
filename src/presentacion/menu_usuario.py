@@ -4,6 +4,7 @@ from getpass import getpass
 from dominio.usuario import Usuario
 from persistencia.empleado_dao import EmpleadoDAO
 from presentacion.menu_empleado import solicitar_id, tipos_errores_bd
+from presentacion.menu_comun import confirmar
 from presentacion.menu_principal import cargar_datos_de_ejemplo
 
 from servicios.autenticacion import (
@@ -13,7 +14,10 @@ from servicios.autenticacion import (
     buscar_usuario_por_id,
     buscar_usuario_por_nombre,
     actualizar_usuario,
-    eliminar_usuario
+    eliminar_usuario,
+    cambiar_nombre_propio,
+    cambiar_clave_propia,
+    eliminar_cuenta_propia
 )
 
 MAX_INTENTOS = 3
@@ -118,14 +122,8 @@ def mostrar_usuarios():
         print("No existen cuentas registradas.")
         return
 
-    print("\n=== CUENTAS REGISTRADAS ===")
-
     for usuario in usuarios:
-        print(
-            f"ID: {usuario.id} | "
-            f"Usuario: {usuario.nombre_usuario} | "
-            f"Empleado ID: {usuario.empleado_id}"
-        )
+        print(f"{usuario.mostrar_datos()} | Rol: {usuario.rol}")
 
 
 def buscar_cuenta():
@@ -162,7 +160,8 @@ def buscar_cuenta():
         print(
             f"ID: {usuario.id} | "
             f"Usuario: {usuario.nombre_usuario} | "
-            f"Empleado ID: {usuario.empleado_id}"
+            f"Empleado ID: {usuario.empleado_id} | "
+            f"Rol: {usuario.rol}"
         )
 
 
@@ -292,32 +291,132 @@ def eliminar_cuenta(usuario_actual):
 
 
 def menu_administrar_usuarios(usuario_actual):
-    if usuario_actual is None or usuario_actual.nombre_usuario != "admin":
+    if usuario_actual is None or not usuario_actual.es_admin:
         print("Acceso denegado. Solo el administrador puede gestionar cuentas.")
         return
 
     while True:
         print("\n=== ADMINISTRACIÓN DE USUARIOS ===")
-        print("1. Listar cuentas")
-        print("2. Buscar cuenta")
-        print("3. Modificar cuenta")
-        print("4. Eliminar cuenta")
+        print("1. Registrar cuenta")
+        print("2. Listar cuentas")
+        print("3. Buscar cuenta")
+        print("4. Modificar cuenta")
+        print("5. Eliminar cuenta")
         print("0. Volver")
 
         opcion = input("Opción: ").strip()
 
         if opcion == "1":
-            mostrar_usuarios()
+            registrar_cuenta()
         elif opcion == "2":
-            buscar_cuenta()
+            mostrar_usuarios()
         elif opcion == "3":
-            modificar_cuenta()
+            buscar_cuenta()
         elif opcion == "4":
+            modificar_cuenta()
+        elif opcion == "5":
             eliminar_cuenta(usuario_actual)
         elif opcion == "0":
             break
         else:
             print("Opción inválida.")
+
+
+def pedir_clave_actual():
+    return getpass("Contraseña actual: ")
+
+
+def cambiar_mi_nombre(usuario_actual):
+    clave = pedir_clave_actual()
+    nuevo = input("Nuevo nombre de usuario: ")
+    IntegrityError, OperationalError = tipos_errores_bd()
+
+    try:
+        filas = cambiar_nombre_propio(usuario_actual.id, clave, nuevo)
+
+    except (TypeError, ValueError) as error:
+        print(f"No se pudo cambiar el nombre: {error}")
+
+    except IntegrityError:
+        print("Ese nombre de usuario ya está registrado.")
+
+    except OperationalError:
+        print("No se pudo actualizar la cuenta.")
+
+    else:
+        if filas:
+            usuario_actual.nombre_usuario = Usuario.normalizar_usuario(nuevo)
+            print(f"Nombre actualizado a: {usuario_actual.nombre_usuario}")
+        else:
+            print("No se realizaron cambios.")
+
+
+def cambiar_mi_clave(usuario_actual):
+    clave = pedir_clave_actual()
+    nueva = solicitar_clave_nueva()
+    _, OperationalError = tipos_errores_bd()
+
+    try:
+        cambiar_clave_propia(usuario_actual.id, clave, nueva)
+
+    except (TypeError, ValueError) as error:
+        print(f"No se pudo cambiar la contraseña: {error}")
+
+    except OperationalError:
+        print("No se pudo actualizar la contraseña.")
+
+    else:
+        print("Contraseña actualizada correctamente.")
+
+
+def eliminar_mi_cuenta(usuario_actual):
+    if not confirmar("¿Eliminar tu cuenta de forma permanente?"):
+        print("Eliminación cancelada.")
+        return False
+
+    clave = pedir_clave_actual()
+    _, OperationalError = tipos_errores_bd()
+
+    try:
+        filas = eliminar_cuenta_propia(usuario_actual.id, clave)
+
+    except (TypeError, ValueError) as error:
+        print(f"No se pudo eliminar la cuenta: {error}")
+        return False
+
+    except OperationalError:
+        print("No se pudo eliminar la cuenta.")
+        return False
+
+    if filas:
+        print("Cuenta eliminada. Se cerrará el programa.")
+        return True
+
+    print("No se encontró la cuenta.")
+    return False
+
+
+def menu_mi_cuenta(usuario_actual):
+    while True:
+        print("\n=== MI CUENTA ===")
+        print("1. Cambiar mi nombre de usuario")
+        print("2. Cambiar mi contraseña")
+        print("3. Eliminar mi cuenta")
+        print("0. Volver")
+
+        opcion = input("Opción: ").strip()
+
+        if opcion == "1":
+            cambiar_mi_nombre(usuario_actual)
+        elif opcion == "2":
+            cambiar_mi_clave(usuario_actual)
+        elif opcion == "3":
+            if eliminar_mi_cuenta(usuario_actual):
+                return True
+        elif opcion == "0":
+            return False
+        else:
+            print("Elige una opción entre 0 y 3.")
 
 
 def menu_acceso():

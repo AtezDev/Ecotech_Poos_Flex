@@ -13,6 +13,9 @@ def crear_proyecto():
     proyecto = Proyecto(nombre, descripcion, fecha)
     IntegrityError, OperationalError = tipos_errores_bd()
     try:
+        if ProyectoDAO.buscar_id_por_nombre(nombre) is not None:
+            print("Ya existe un proyecto con ese nombre; no se registró de nuevo.")
+            return
         ProyectoDAO.insertar(proyecto)
     except IntegrityError:
         print("No se pudo registrar: revisa las restricciones de la BD.")

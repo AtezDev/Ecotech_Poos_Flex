@@ -71,6 +71,9 @@ def crear_empleado():
     empleado = Empleado(nombre, direccion, telefono, correo, fecha, salario)
     IntegrityError, OperationalError = tipos_errores_bd()
     try:
+        if EmpleadoDAO.buscar_id_por_correo(correo) is not None:
+            print("Ya existe un empleado con ese correo; no se registró de nuevo.")
+            return
         EmpleadoDAO.insertar(empleado)
     except IntegrityError:
         print("No se pudo registrar: revisa las restricciones de la BD.")
@@ -119,6 +122,9 @@ def actualizar_empleado():
         nuevo_correo = solicitar("Nuevo correo", Empleado.validar_correo)
         if nuevo_correo == empleado.correoElectronico:
             print("El correo es el mismo; no hay cambios.")
+            return
+        if EmpleadoDAO.buscar_id_por_correo(nuevo_correo) is not None:
+            print("Ese correo ya pertenece a otro empleado; no se actualizó.")
             return
         empleado.correoElectronico = nuevo_correo
         filas = EmpleadoDAO.actualizar(empleado)

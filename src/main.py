@@ -22,25 +22,43 @@ from presentacion.menu_usuario import (
 )
 
 
+CORREO_DEMO = "ana.demo@ecotech.cl"
+
+
 def demostrar_relaciones():
     # Demo de clases anteriores. Se ejecuta SOLO con --demo.
     # Conserva Departamento, Proyecto, asociación N:M y RegistroTiempo.
+    # Si ya se cargó, no vuelve a insertar nada.
 
-    departamento = Departamento("Desarrollo")
-    DepartamentoDAO.insertar(departamento)
+    if EmpleadoDAO.buscar_id_por_correo(CORREO_DEMO) is not None:
+        print("La demostración ya está cargada; no se duplicó ningún dato.")
+        return
 
-    proyecto = Proyecto(
-        "EcoTech",
-        "Gestión de empleados",
-        date(2026, 11, 10)
-    )
-    ProyectoDAO.insertar(proyecto)
+    id_departamento = DepartamentoDAO.buscar_id_por_nombre("Desarrollo")
+
+    if id_departamento is None:
+        departamento = Departamento("Desarrollo")
+        DepartamentoDAO.insertar(departamento)
+    else:
+        departamento = DepartamentoDAO.buscar_por_id(id_departamento)
+
+    id_proyecto = ProyectoDAO.buscar_id_por_nombre("EcoTech")
+
+    if id_proyecto is None:
+        proyecto = Proyecto(
+            "EcoTech",
+            "Gestión de empleados",
+            date(2026, 11, 10)
+        )
+        ProyectoDAO.insertar(proyecto)
+    else:
+        proyecto = ProyectoDAO.buscar_por_id(id_proyecto)
 
     empleado = Empleado(
         "Ana Torres",
         "La Serena",
         "+56912345678",
-        "ana.torres@ecotech.cl",
+        CORREO_DEMO,
         date(2026, 11, 10),
         950000
     )
@@ -52,8 +70,6 @@ def demostrar_relaciones():
     print("Proyecto:", proyecto.mostrar_datos())
     print("Empleado:", empleado.mostrar_datos())
 
-    # En objetos: referencia a Proyecto.
-    # En SQL: IDs en empleado_proyecto.
     empleado.asignarAProyecto(proyecto)
 
     guardada = EmpleadoProyectoDAO.asignar(empleado, proyecto)

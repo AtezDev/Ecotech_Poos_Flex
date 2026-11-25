@@ -10,3 +10,7 @@ Orden de aprendizaje recomendado:
 6. FLEX: `05_FLEX_Menu_CRUD_Excepciones.pdf`.
 
 Los ejemplos del docente son deliberadamente más pequeños que el UML final. Nunca borres de EcoTech atributos o relaciones del UML para hacer que el ejemplo y el proyecto tengan el mismo tamaño.
+7. FLEX: `06_Flex_U2_U3_Clase5_Relaciones_Herencia_Polimorfismo.pdf` (relaciones, herencia y polimorfismo; Clase 5).
+8. FLEX: `07_Flex_U2_U3_Clase6_Usuario_Autenticacion.pdf` (usuario, hash y autenticación; Clase 6).
+9. Repaso: `Guia_Repaso_EcoTech_Objetos_Persistencia_Autenticacion.pdf` (guía de estudio de objetos a autenticación, con respuestas en las páginas 17 a 19).
+10. Apoyo: `Importación circular en Python.png` (relacionado con el Paso 5 de la Clase 5: `@property` y el import circular).

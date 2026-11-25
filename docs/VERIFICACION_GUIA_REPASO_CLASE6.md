@@ -1,6 +1,6 @@
 # Verificación contra la Guía de repaso (Objetos, persistencia y autenticación)
 
-Estado: SQLite/Linux 130/130 pruebas OK; MariaDB 10.11 (como MySQL) con sondeo de `usuario`, registro y login OK. Pendiente: tu Windows y WampServer.
+Estado: SQLite/Linux 161/161 pruebas OK con `unittest` y `pytest`; MariaDB 10.11 (como MySQL) con la evidencia de abajo. Pendiente: tu Windows y WampServer.
 
 | Sección de la guía | Qué pide | Dónde se cumple | Prueba |
 |---|---|---|---|
@@ -36,3 +36,25 @@ Estado: SQLite/Linux 130/130 pruebas OK; MariaDB 10.11 (como MySQL) con sondeo d
 - Crear cuenta sin sesión previa es un arranque de clase; en un sistema real lo haría un administrador.
 - `--demo` y `--listar` no pasan por el login.
 - Probar en Windows y WampServer. En Git Bash, `getpass` puede fallar; usa `winpty python src/main.py` o la terminal de Windows.
+
+## Evidencia de laboratorio (resultado esperado y observado)
+
+Lo que la guía pide en las actividades 1 y 2: caso, resultado esperado y resultado observado. «Observado» quiere decir que se ejecutó el programa de punta a punta. Cuando dice «pruebas automáticas», el caso lo cubre la suite, no una ejecución manual.
+
+| Caso | Resultado esperado | Observado en SQLite | Observado en MariaDB 10.11 |
+|---|---|---|---|
+| S1 Semillas, primera carga | 2 departamentos y 3 empleados nuevos | Sí | Sí |
+| S2 Semillas repetidas (2 y 3 veces) | Ningún dato nuevo | Sí | Sí |
+| S3 Semillas sin `ADMIN_PASSWORD` | Carga los datos, no crea `admin` y lo informa | Sí | Sí |
+| S4 Semillas con `ADMIN_PASSWORD` | Crea `admin` ligado a Ana Torres (ID 1) | Sí | Sí |
+| S5 Clave de admin de 7 caracteres (`ecotech`) | Rechazada: mínimo 15 | Sí | Sí |
+| S6 Login con clave incorrecta | No abre el menú; mensaje público | Sí | Sí |
+| S7 Login `admin` correcto | Muestra el empleado vinculado y la opción 8 (Administrar usuarios) | Sí | Sí |
+| S8 `--demo` dos veces | Solo la primera carga inserta | Sí | Sí |
+| S9 Registrar empleado con correo repetido | Rechazado con mensaje | Sí | Sí |
+| S10 Admin elimina la cuenta de otro, con confirmación | Se elimina la cuenta | Sí | Sí |
+| S11 Admin intenta eliminar su propia cuenta | Bloqueado | Sí | Sí |
+| S12 Falla la consulta de cuentas (tabla borrada) | No entra al menú | Pruebas automáticas (`test_18`, `test_30`) | Pruebas automáticas |
+| S13 Departamento con empleados tras reiniciar | Se recupera desde la BD | Pruebas automáticas (`test_clase5.py`) | Pruebas automáticas |
+
+**Commit identificable:** anota aquí el hash del commit con el que subas esta actualización: `________`.

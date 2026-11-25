@@ -1,6 +1,30 @@
 from persistencia.conexion import abrir_conexion, obtener_motor
 
 
+def agregar_columna_rol(cursor, motor):
+    if motor == "sqlite":
+        cursor.execute("PRAGMA table_info(usuario)")
+        columnas = {fila[1] for fila in cursor.fetchall()}
+    else:
+        cursor.execute("SHOW COLUMNS FROM usuario")
+        columnas = {fila[0] for fila in cursor.fetchall()}
+
+    if "rol" in columnas:
+        return
+
+    cursor.execute(
+        "ALTER TABLE usuario ADD COLUMN rol "
+        + ("TEXT NOT NULL DEFAULT 'empleado' CHECK (rol IN ('admin', 'empleado'))"
+           if motor == "sqlite"
+           else "VARCHAR(20) NOT NULL DEFAULT 'empleado' CHECK (rol IN ('admin', 'empleado'))")
+    )
+    marcador = "?" if motor == "sqlite" else "%s"
+    cursor.execute(
+        f"UPDATE usuario SET rol = {marcador} WHERE nombre_usuario = {marcador}",
+        ("admin", "admin")
+    )
+
+
 def crear_tablas():
     # Primero comprobamos el esquema: no debemos sobrescribir la base vieja.
     conexion = abrir_conexion()
@@ -90,7 +114,15 @@ def crear_tablas():
                     nombre_usuario TEXT NOT NULL UNIQUE,
                     password_hash TEXT NOT NULL,
                     empleado_id INTEGER NOT NULL UNIQUE,
+                    rol TEXT NOT NULL DEFAULT 'empleado'
+                        CHECK (rol IN ('admin', 'empleado')),
                     FOREIGN KEY (empleado_id) REFERENCES empleado(id)
+                )""",
+                """CREATE TABLE IF NOT EXISTS indicador (
+                    codigo TEXT NOT NULL,
+                    fecha TEXT NOT NULL,
+                    valor REAL NOT NULL,
+                    PRIMARY KEY (codigo, fecha)
                 )"""
             ]
         else:
@@ -140,7 +172,15 @@ def crear_tablas():
                     nombre_usuario VARCHAR(40) NOT NULL UNIQUE,
                     password_hash VARCHAR(100) NOT NULL,
                     empleado_id INT NOT NULL UNIQUE,
+                    rol VARCHAR(20) NOT NULL DEFAULT 'empleado'
+                        CHECK (rol IN ('admin', 'empleado')),
                     FOREIGN KEY (empleado_id) REFERENCES empleado(id)
+                ) ENGINE=InnoDB""",
+                """CREATE TABLE IF NOT EXISTS indicador (
+                    codigo VARCHAR(10) NOT NULL,
+                    fecha CHAR(10) NOT NULL,
+                    valor DOUBLE NOT NULL,
+                    PRIMARY KEY (codigo, fecha)
                 ) ENGINE=InnoDB"""
             ]
 
@@ -153,6 +193,10 @@ def crear_tablas():
             cursor.execute(sql)
         if motor == "mysql":
             cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+
+        # Bases creadas en la unidad 2 no tienen la columna rol: la agregamos
+        # y asignamos el rol admin a la cuenta reservada existente.
+        agregar_columna_rol(cursor, motor)
 
         conexion.commit()
     finally:

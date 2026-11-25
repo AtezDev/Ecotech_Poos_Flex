@@ -7,7 +7,7 @@
 
 **Estado de GitHub comprobado al preparar esta carpeta:** rama `main`, último commit visible `03308d6` (*Actualizacion CRUD*, 17 de noviembre de 2026). El estudiante confirmó que las **44 pruebas originales terminaron en `OK` en Windows** y que el `push` de la fusión fue exitoso.
 
-**Clase 6 (19 de noviembre):** `Usuario`, `usuario_dao.py`, `servicios/autenticacion.py` (bcrypt), `menu_usuario.py` y login previo al menú principal; 130 pruebas OK en SQLite y sondeo en MariaDB.
+**Clase 6 (19 de noviembre):** `Usuario`, `usuario_dao.py`, `servicios/autenticacion.py` (bcrypt), `menu_usuario.py` y login previo al menú principal. Cuenta `admin` creada desde la opción 3 con `ADMIN_PASSWORD` del `.env` (el nombre `admin` está reservado), sin duplicar semillas ni cuentas (`--demo` tampoco duplica). **161 pruebas OK** en SQLite con `unittest` y `pytest`; comprobado también en MariaDB 10.11.
 
 **Ampliación de la Clase 5 (17 de noviembre, noche):** el gerente como llave foránea a `empleado` (decisión del profesor), el departamento visible al listar o buscar un empleado, la relación Empleado–Departamento guardada y recuperada (`actualizar_departamento`, `buscar_con_empleados`), y reportes con herencia y polimorfismo (`dominio/reporte.py`). la propiedad `departamento` con setter validado (Paso 5), `imprimir_reportes()` y las **semillas** (`persistencia/semillas.py`, opción 6 del menú principal). Pasaron **94/94 pruebas en SQLite** (Linux) y un recorrido contra MariaDB 10.11 (incluida la llave circular `gerente_id` y las semillas dos veces); **falta ejecutarlas en tu Windows**.
 
@@ -113,7 +113,9 @@ Ecotech_Poos_Flex/
 │   ├── test_ecotech.py                # 44 casos de prueba originales
 │   ├── test_crud.py                   # 20 casos nuevos del CRUD completo
 │   ├── test_clase5.py                 # 30 casos de la Clase 5, del gerente y de las semillas
-│   └── test_clase6.py                 # 36 casos de la Clase 6: usuario, bcrypt y login
+│   ├── test_clase6.py                 # 36 casos de la Clase 6: usuario, bcrypt y login
+│   ├── test_idempotencia.py           # 14 casos: semillas, admin, --demo y duplicados
+│   └── test_cuentas_crud.py           # 17 casos: CRUD de cuentas, Mi cuenta y nombre reservado
 ├── docs/
 │   ├── audt_diagr/
 │   │   ├── Diagrama_Final.drawio       # UML definitivo: 3 vistas
@@ -235,7 +237,7 @@ class Empleado:
 
 **Avance en EcoTech:**
 
-- `conexion.py` abre SQLite o MySQL según las variables de `.env`.
+- `conexion.py` abre SQLite o MySQL según las variables de `.env`. También lee `ADMIN_PASSWORD` (clave de la cuenta admin).
 - `creacion_bd.py` crea las tablas necesarias del modelo y verifica columnas esenciales si la tabla ya existía.
 - Los DAO (`EmpleadoDAO`, `DepartamentoDAO`, `ProyectoDAO`, `RegistroTiempoDAO`) realizan las inserciones pertinentes.
 - `EmpleadoDAO.insertar()` obtiene el ID generado por la base de datos y lo asigna al objeto después de confirmar el registro.
@@ -532,6 +534,23 @@ Una cuenta (`Usuario`) **se asocia** a un `Empleado`; no hereda de él. Autentic
 
 ---
 
+**Cuenta admin y repetición de semillas:** la opción 3 crea `admin` solo si no existe. Al repetir las semillas o `--demo`, no se multiplican empleados, departamentos, proyectos ni cuentas (detalle en `docs/IDEMPOTENCIA_Y_DUPLICADOS.md`). El menú «Mi cuenta» (opción 7) aparece para cualquier usuario que inició sesión. «Administrar usuarios» (opción 8) solo aparece para `admin`.
+
+---
+
+### FLEX · Unidad 3 · Clase 7 — Roles, permisos y API de indicadores
+
+- **Roles:** `Usuario` tiene `rol` (`admin` o `empleado`; por defecto `empleado`). El administrador inicial se crea con rol `admin`.
+- **Migración:** una base creada en la Unidad 2 recibe la columna `rol` al ejecutar `python src/main.py`; la cuenta `admin` queda con rol admin. No hace falta borrar la base.
+- **Permisos:** `servicios/permisos.py` (`exigir_sesion`, `exigir_admin`). La administración depende del rol, no del nombre.
+- **Menús:** el administrador ve todas sus opciones y «9. Indicadores económicos». El empleado ve «1. Mi ficha», «2. Indicadores económicos» (solo consulta) y «3. Mi cuenta».
+- **API de indicadores:** `servicios/api_indicadores.py` consulta `https://api.boostr.cl/economy/indicators.json` con `timeout=(3, 5)`, usa `raise_for_status()` y convierte el JSON en `Indicador` con `extraer_primero()`.
+- **Persistencia:** tabla `indicador` con clave `(codigo, fecha)`: una sola fila por código y fecha; guardar de nuevo actualiza el valor.
+- **Respaldo:** si la API falla, `actualizar_uf` muestra el último dato guardado (origen «respaldo»); si no hay ninguno, informa que no hay información disponible. Solo se informa «API» después del commit.
+- **Pruebas:** `tests/test_unidad3.py` usa JSON ficticio y fallas simuladas (`mock`); no consulta la API real.
+
+**Limitación honesta:** en el entorno donde se preparó esta entrega, `api.boostr.cl` estaba bloqueada (403 del proxy). La consulta real a la API debe probarse en tu computador con `python src/main.py`, opción 9 → 2 (con cuenta admin).
+
 ## 5. UML definitivo: clases, atributos, relaciones y estado
 
 El diagrama se conserva en tres vistas: **(1) modelo de clases**, **(2) relaciones de Informe y autorización** y **(3) constructores, accesores y validaciones**. Es el contrato principal para continuar.
@@ -650,6 +669,35 @@ DB_NAME=ecotech_practica.db
 
 La aplicación crea `ecotech_practica.db` en la raíz del proyecto al ejecutar la preparación de tablas. Ese archivo **no se comparte por Git**.
 
+### Cuentas: CRUD y reglas de acceso
+
+| Operación | Quién | Dónde |
+|---|---|---|
+| Crear cuenta | Cualquiera desde el acceso (opción 2); el admin desde su menú (1) | `registrar_usuario`, `registrar_cuenta` |
+| Listar | Admin | `mostrar_usuarios` (opción 2 del admin) |
+| Buscar por ID o nombre | Admin | `buscar_cuenta` |
+| Modificar nombre o clave de cualquier cuenta | Admin (sin clave actual) | `modificar_cuenta` |
+| Eliminar cuenta ajena, con confirmación | Admin | `eliminar_cuenta` |
+| Cambiar mi nombre | Yo (con mi clave actual) | `cambiar_mi_nombre` (Mi cuenta, 1) |
+| Cambiar mi clave | Yo (con mi clave actual, distinta de la anterior) | `cambiar_mi_clave` (Mi cuenta, 2) |
+| Eliminar mi cuenta | Yo (con mi clave actual y confirmación) | `eliminar_mi_cuenta` (Mi cuenta, 3) |
+
+Reglas: el nombre `admin` está reservado y no lo puede tomar nadie más; la cuenta `admin` no puede cambiar su nombre ni eliminarse desde Mi cuenta; un usuario no puede eliminar la cuenta con la que inició sesión desde el menú de administración.
+
+### Clave de la cuenta admin (`ADMIN_PASSWORD`)
+
+La opción 3 del menú de acceso (semillas) crea la cuenta `admin` la primera vez, ligada al primer empleado sin cuenta. Su clave **no está en el código**: se toma de tu `.env` local.
+
+```dotenv
+ADMIN_PASSWORD=tu-clave-de-al-menos-15-caracteres
+```
+
+Puedes generar una clave con `python -c "import secrets; print(secrets.token_urlsafe(16))"`. Si falta la línea, las semillas se cargan igual, pero el programa avisa que no pudo crear el administrador. Si la clave tiene menos de 15 caracteres, también se informa y no se crea la cuenta.
+
+- No subas tu `.env` a GitHub.
+- Si cambias la clave del admin, hazlo desde «Administrar usuarios» → «Modificar cuenta» → «Cambiar contraseña».
+- La versión `f6c6a44` tenía la clave escrita en `semillas.py`. Si esa base se usó con esa clave en un entorno real, cámbiala.
+
 ### Configuración alternativa con MySQL
 
 Crear primero una **base de práctica nueva** en phpMyAdmin o MySQL Workbench:
@@ -736,7 +784,7 @@ python -m compileall -q src
 python -m unittest discover -s tests -v
 ```
 
-La versión actual contiene **130 pruebas**: 44 en `tests/test_ecotech.py`, 20 en `tests/test_crud.py`, 30 en `tests/test_clase5.py` y 36 en `tests/test_clase6.py`. En esta revisión se ejecutaron en conjunto en SQLite/Linux: **130/130 `OK`**, y la tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución local en Windows y la comprobación de esta versión contra MySQL/WampServer siguen pendientes. El README conserva el antecedente de una prueba previa con MariaDB 10.11; no se considera una validación de tu instalación WampServer.
+La versión actual contiene **161 pruebas**: 44 en `tests/test_ecotech.py`, 20 en `tests/test_crud.py`, 30 en `tests/test_clase5.py`, 36 en `tests/test_clase6.py`, 14 en `tests/test_idempotencia.py` y 17 en `tests/test_cuentas_crud.py`. En esta revisión se ejecutaron en conjunto en SQLite/Linux: **161/161 `OK`** (también con `pytest`), y la tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución local en Windows y la comprobación de esta versión contra MySQL/WampServer siguen pendientes. El README conserva el antecedente de una prueba previa con MariaDB 10.11; no se considera una validación de tu instalación WampServer.
 
 Las pruebas cubren, entre otros aspectos:
 
@@ -900,7 +948,9 @@ En particular, conservar `docs/audt_diagr/ALCANCE_Y_AUDITORIA.md`, el UML final,
 
 7. **Semillas:** implementadas en `persistencia/semillas.py` (ver «Semillas» en la sección de la Clase 5). Falta que expliques el resultado al profesor y las pruebes en tu Windows y en MySQL/WampServer.
 8. **`@property departamento`:** implementada (Paso 5). Confirma con el profesor la forma de evitar el import circular.
-9. **Próxima clase según el profesor:** revisión de semillas y avance hacia Usuario e inicio de sesión (`CuentaUsuario` y `ControlAcceso` del UML).
+9. **Próxima clase (martes, según el profesor):** APIs y otros temas. Las dudas de la Clase 6 se consultan ese día.
+10. **Restricciones UNIQUE** de `empleado.correo`, `departamento.nombre` y `proyecto.nombre`: pendiente de confirmar con el profesor. Hoy el programa lo evita antes de insertar (ver `docs/IDEMPOTENCIA_Y_DUPLICADOS.md`).
+11. **Permisos por rol:** hoy el administrador se reconoce por el nombre de cuenta `admin`. Los roles formales quedan para la clase siguiente.
 
 ### Criterio para los próximos avances
 

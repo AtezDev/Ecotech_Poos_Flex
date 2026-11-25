@@ -1,4 +1,5 @@
 
+import os
 from datetime import date
 
 from dominio.departamento import Departamento
@@ -9,7 +10,7 @@ from persistencia.departamento_dao import DepartamentoDAO
 from persistencia.empleado_dao import EmpleadoDAO
 from persistencia.usuario_dao import UsuarioDAO
 
-from servicios.autenticacion import registrar_usuario
+from servicios.autenticacion import crear_cuenta
 
 
 DEPARTAMENTOS = [
@@ -29,7 +30,17 @@ EMPLEADOS = [
 ]
 
 USUARIO_ADMIN = "admin"
-CLAVE_ADMIN_INICIAL = "EcoTech2026!Admin"
+
+
+def obtener_clave_admin_inicial():
+    clave = os.getenv("ADMIN_PASSWORD")
+
+    if not clave:
+        raise ValueError(
+            "Falta ADMIN_PASSWORD en tu archivo .env para crear el administrador."
+        )
+
+    return clave
 
 
 def buscar_id_departamento(nombre):
@@ -83,10 +94,12 @@ def asegurar_admin_inicial():
         cuenta = UsuarioDAO.buscar_por_empleado_id(empleado.id)
 
         if cuenta is None:
-            registrar_usuario(
+            clave = obtener_clave_admin_inicial()
+            crear_cuenta(
                 empleado.id,
                 USUARIO_ADMIN,
-                CLAVE_ADMIN_INICIAL
+                clave,
+                rol="admin"
             )
             return True
 

@@ -59,6 +59,23 @@ class EmpleadoDAO:
         return empleados  # Devuelve [] cuando la tabla está vacía.
 
     @staticmethod
+    def buscar_id_por_correo(correo):
+        conexion = abrir_conexion()
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            cursor.execute(
+                f"SELECT id FROM empleado WHERE correo = {marcador}",
+                (correo,)
+            )
+            fila = cursor.fetchone()
+        finally:
+            conexion.close()
+        if fila is None:
+            return None
+        return fila[0]
+
+    @staticmethod
     def buscar_por_id(id_empleado):
         conexion = abrir_conexion()
         try:

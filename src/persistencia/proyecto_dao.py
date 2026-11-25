@@ -40,6 +40,23 @@ class ProyectoDAO:
         return proyectos
 
     @staticmethod
+    def buscar_id_por_nombre(nombre):
+        conexion = abrir_conexion()
+        try:
+            cursor = conexion.cursor()
+            marcador = "?" if obtener_motor() == "sqlite" else "%s"
+            cursor.execute(
+                f"SELECT id FROM proyecto WHERE nombre = {marcador}",
+                (nombre,)
+            )
+            fila = cursor.fetchone()
+        finally:
+            conexion.close()
+        if fila is None:
+            return None
+        return fila[0]
+
+    @staticmethod
     def buscar_por_id(id_proyecto):
         conexion = abrir_conexion()
         try:

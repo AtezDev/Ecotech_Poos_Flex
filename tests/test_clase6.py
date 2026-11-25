@@ -347,13 +347,14 @@ class TestClase6(unittest.TestCase):
         self.assertNotIn('ECOTECH SOLUTIONS', texto)
 
     def test_32_flujo_completo_semillas_cuenta_login_y_reportes(self):
-        entradas = ['3', '2', '2', 'luis.soto', '1', 'luis.soto', '1', '12', '1', '0', '0']
+        entradas = ['3', '2', '2', 'luis.soto', '1', 'luis.soto', '1', '0']
         claves = [CLAVE, CLAVE, CLAVE]
         _, texto = self.correr_main(entradas, claves)
         self.assertIn('Cuenta creada para el usuario: luis.soto', texto)
         self.assertIn('Sesión: luis.soto', texto)
         self.assertIn('Empleado: Luis Soto | luis.soto@ecotech.cl', texto)
-        self.assertIn('Reporte general', texto)
+        self.assertIn('=== ECOTECH SOLUTIONS ===', texto)
+        self.assertIn('1. Mi ficha', texto)
         self.assertIn('Departamento: Soporte', texto)
 
     def test_33_cuenta_persistida_tras_reiniciar_otro_proceso(self):

@@ -1,4 +1,3 @@
-
 from dominio.usuario import Usuario
 from persistencia.conexion import abrir_conexion, obtener_motor
 
@@ -16,13 +15,14 @@ class UsuarioDAO:
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
 
             sql = f"""INSERT INTO usuario
-                      (nombre_usuario, password_hash, empleado_id)
-                      VALUES ({marcador}, {marcador}, {marcador})"""
+                      (nombre_usuario, password_hash, empleado_id, rol)
+                      VALUES ({marcador}, {marcador}, {marcador}, {marcador})"""
 
             cursor.execute(sql, (
                 usuario.nombre_usuario,
                 usuario.password_hash,
-                usuario.empleado_id
+                usuario.empleado_id,
+                usuario.rol
             ))
 
             usuario.id = cursor.lastrowid
@@ -38,7 +38,7 @@ class UsuarioDAO:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
 
-            sql = f"""SELECT id, nombre_usuario, password_hash, empleado_id
+            sql = f"""SELECT id, nombre_usuario, password_hash, empleado_id, rol
                       FROM usuario
                       WHERE nombre_usuario = {marcador}"""
 
@@ -50,8 +50,7 @@ class UsuarioDAO:
         if fila is None:
             return None
 
-        id_cuenta, nombre, password_hash, empleado_id = fila
-        return Usuario(nombre, password_hash, empleado_id, id=id_cuenta)
+        return UsuarioDAO._desde_fila(fila)
 
     @staticmethod
     def buscar_por_id(id_usuario):
@@ -60,7 +59,7 @@ class UsuarioDAO:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
 
-            sql = f"""SELECT id, nombre_usuario, password_hash, empleado_id
+            sql = f"""SELECT id, nombre_usuario, password_hash, empleado_id, rol
                       FROM usuario
                       WHERE id = {marcador}"""
 
@@ -72,8 +71,7 @@ class UsuarioDAO:
         if fila is None:
             return None
 
-        id_cuenta, nombre, password_hash, empleado_id = fila
-        return Usuario(nombre, password_hash, empleado_id, id=id_cuenta)
+        return UsuarioDAO._desde_fila(fila)
 
     @staticmethod
     def buscar_por_empleado_id(empleado_id):
@@ -82,7 +80,7 @@ class UsuarioDAO:
             cursor = conexion.cursor()
             marcador = "?" if obtener_motor() == "sqlite" else "%s"
 
-            sql = f"""SELECT id, nombre_usuario, password_hash, empleado_id
+            sql = f"""SELECT id, nombre_usuario, password_hash, empleado_id, rol
                       FROM usuario
                       WHERE empleado_id = {marcador}"""
 
@@ -94,29 +92,21 @@ class UsuarioDAO:
         if fila is None:
             return None
 
-        id_cuenta, nombre, password_hash, id_empleado = fila
-        return Usuario(nombre, password_hash, id_empleado, id=id_cuenta)
+        return UsuarioDAO._desde_fila(fila)
 
     @staticmethod
     def listar():
         conexion = abrir_conexion()
         try:
             cursor = conexion.cursor()
-            cursor.execute("""SELECT id, nombre_usuario, password_hash, empleado_id
+            cursor.execute("""SELECT id, nombre_usuario, password_hash, empleado_id, rol
                               FROM usuario
                               ORDER BY id""")
             filas = cursor.fetchall()
         finally:
             conexion.close()
 
-        usuarios = []
-
-        for id_cuenta, nombre, password_hash, empleado_id in filas:
-            usuarios.append(
-                Usuario(nombre, password_hash, empleado_id, id=id_cuenta)
-            )
-
-        return usuarios
+        return [UsuarioDAO._desde_fila(fila) for fila in filas]
 
     @staticmethod
     def actualizar(usuario):
@@ -130,12 +120,14 @@ class UsuarioDAO:
 
             sql = f"""UPDATE usuario
                       SET nombre_usuario = {marcador},
-                          password_hash = {marcador}
+                          password_hash = {marcador},
+                          rol = {marcador}
                       WHERE id = {marcador}"""
 
             cursor.execute(sql, (
                 usuario.nombre_usuario,
                 usuario.password_hash,
+                usuario.rol,
                 usuario.id
             ))
 
@@ -160,3 +152,8 @@ class UsuarioDAO:
             return filas
         finally:
             conexion.close()
+
+    @staticmethod
+    def _desde_fila(fila):
+        id_cuenta, nombre, password_hash, empleado_id, rol = fila
+        return Usuario(nombre, password_hash, empleado_id, id=id_cuenta, rol=rol)

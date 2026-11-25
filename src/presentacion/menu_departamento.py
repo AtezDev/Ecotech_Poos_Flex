@@ -33,6 +33,9 @@ def crear_departamento():
     nombre = solicitar("Nombre", validar_texto_obligatorio)
     IntegrityError, OperationalError = tipos_errores_bd()
     try:
+        if DepartamentoDAO.buscar_id_por_nombre(nombre) is not None:
+            print("Ya existe un departamento con ese nombre; no se registró de nuevo.")
+            return
         gerente = seleccionar_gerente()
         departamento = Departamento(nombre, gerente)
         DepartamentoDAO.insertar(departamento)
