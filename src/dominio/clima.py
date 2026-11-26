@@ -24,9 +24,11 @@ class Clima:
         if not isinstance(ciudad, str):
             raise TypeError("La ciudad debe ser texto.")
         ciudad = ciudad.strip()
+        if not ciudad or not any(c.isalpha() for c in ciudad):
+            raise ValueError("Escribe el nombre de la ciudad.")
         if not 2 <= len(ciudad) <= 60:
             raise ValueError("La ciudad debe tener entre 2 y 60 caracteres.")
-        if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ .'-]+", ciudad):
+        if not re.fullmatch(r"[A-Za-z\u00C0-\u024F .'-]+", ciudad):
             raise ValueError("La ciudad solo puede contener letras, espacios, guiones o apóstrofes.")
         return ciudad
 

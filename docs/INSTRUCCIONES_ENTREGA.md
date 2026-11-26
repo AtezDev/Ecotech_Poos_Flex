@@ -9,7 +9,7 @@ No se aceptan entregas por correo. Después de la entrega viene la defensa indiv
 3. Activa el entorno virtual e instala las dependencias: `python -m pip install -r requirements.txt`.
 
 ## 2. Verificar que todo funciona
-1. Ejecuta las pruebas: `python -m unittest discover -s tests -p "test_*.py"`. Resultado esperado: `Ran 189 tests` y `OK`.
+1. Ejecuta las pruebas: `python -m unittest discover -s tests -p "test_*.py"`. Resultado esperado: `Ran 201 tests` y `OK`.
 2. Ejecuta el programa: `python src/main.py`.
 3. Inicia sesión como `admin` y prueba:
    - Opción 9, luego 2: actualizar UF, DOLAR y EURO desde la API. Debe salir `Origen: API`.
@@ -22,7 +22,7 @@ No se aceptan entregas por correo. Después de la entrega viene la defensa indiv
 - No incluir `.env`, `.git`, `.venv`, `__pycache__`, `*.db` ni el archivo `ecotech`.
 
 ## 4. Revisión final antes de subir
-- [ ] Las 189 pruebas pasan.
+- [ ] Las 201 pruebas pasan.
 - [ ] La API responde (o el respaldo funciona) en UF, DOLAR, EURO y clima.
 - [ ] `docs/USO_DE_IA_Y_DECISIONES.md` está completo y coincide con lo que hiciste.
 - [ ] El README coincide con el programa (menús, pruebas y pendientes).

@@ -1,3 +1,4 @@
+from dominio.indicador import Indicador
 from presentacion.menu_clima import menu_clima
 from presentacion.menu_empleado import tipos_errores_bd
 from servicios.indicadores import (
@@ -22,6 +23,19 @@ def mostrar_indicador(indicador, origen=None, codigo=None):
         print(f"Origen: {ORIGENES[origen]}")
 
 
+def solicitar_codigo_indicador():
+    while True:
+        codigo = input("Indicador (UF, DOLAR o EURO): ").strip().upper()
+
+        if codigo in Indicador.CODIGOS_VALIDOS:
+            return codigo
+
+        if not codigo:
+            print("Escribe el nombre del indicador.")
+        else:
+            print("Indicador no reconocido. Usa UF, DOLAR o EURO.")
+
+
 def menu_indicadores(usuario_actual):
     _, OperationalError = tipos_errores_bd()
 
@@ -35,7 +49,7 @@ def menu_indicadores(usuario_actual):
         opcion = input("Opción: ").strip()
 
         if opcion == "1":
-            codigo = input("Indicador (UF, DOLAR o EURO): ").strip().upper()
+            codigo = solicitar_codigo_indicador()
             try:
                 indicador = consultar_indicador_guardado(usuario_actual, codigo)
             except (PermissionError, ValueError) as error:

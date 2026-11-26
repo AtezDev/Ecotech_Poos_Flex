@@ -19,14 +19,19 @@ def seleccionar_gerente():
         texto = input("ID del gerente (Enter para dejarlo sin gerente): ").strip()
         if texto == "":
             return None
-        if not texto.isdigit():
+        try:
+            id_gerente = int(texto)
+        except ValueError:
             print("Escribe solo el número de ID del empleado.")
+            continue
+        if id_gerente <= 0:
+            print("El ID debe ser positivo.")
+            continue
+        gerente = EmpleadoDAO.buscar_por_id(id_gerente)
+        if gerente is None:
+            print("No existe ningún empleado con ese ID. Elige uno de la lista.")
         else:
-            gerente = EmpleadoDAO.buscar_por_id(int(texto))
-            if gerente is None:
-                print("No existe ningún empleado con ese ID. Elige uno de la lista.")
-            else:
-                return gerente
+            return gerente
 
 
 def crear_departamento():

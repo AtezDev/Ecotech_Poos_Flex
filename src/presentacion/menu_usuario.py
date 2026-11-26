@@ -271,9 +271,7 @@ def eliminar_cuenta(usuario_actual):
         return
 
     print(f"Cuenta seleccionada: {usuario.nombre_usuario}")
-    confirmacion = input("¿Confirmas su eliminación? (S/N): ").strip().lower()
-
-    if confirmacion != "s":
+    if not confirmar("¿Confirmas su eliminación?"):
         print("Eliminación cancelada.")
         return
 

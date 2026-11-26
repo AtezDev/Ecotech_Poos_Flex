@@ -34,3 +34,22 @@ Las pruebas de la API real se hicieron en el computador del estudiante, porque e
 - Confirmar la restricción del menú del empleado (fila de la tabla).
 - Confirmar que la modalidad de trabajo es individual (ver `docs/INSTRUCCIONES_ENTREGA.md`).
 - Ejecutar las pruebas en el computador antes de subir la entrega.
+
+## 5. Revisión de validación de entradas (26-nov, última sesión)
+
+Pedido del estudiante: que todas las entradas del programa se validen y que ningún dato vacío, con caracteres no válidos o fuera de rango haga caer el programa o avance al paso siguiente.
+
+| Entrada | Problema encontrado | Corrección | Prueba |
+|---|---|---|---|
+| Ciudad del clima | Se aceptaba vacía y el programa pasaba a latitud | Se valida al instante y se vuelve a pedir; no admite vacío, solo espacios, ni números o símbolos | `test_validacion_entradas.py` 01, 02, 03 |
+| Latitud y longitud | Aceptaban texto vacío y, en algunos casos, `nan` o `inf` | Se vuelven a pedir si no son números finitos o están fuera de rango | 04, 05 |
+| Código de indicador | Un código inválido se mostraba como error al final | Se vuelve a pedir hasta UF, DOLAR o EURO | 06 |
+| Confirmaciones S/N | Algunas aceptaban cualquier respuesta como «no» | Se vuelve a pedir si no es s o n (`confirmar`) | 07, 08 |
+| IDs de empleado | Aceptan solo enteros positivos | Se vuelven a pedir | 09 |
+| Gerente de un departamento | `isdigit()` acepta el superíndice `²`, que luego hacía fallar `int()` y cerraba el programa | Conversión con `try/except` y control de positivo | 10 |
+| Salario y horas | Mismo riesgo con `²` | Se rechaza y se vuelve a pedir | 12 |
+| Login con usuario vacío | Se rechaza con mensaje genérico, sin revelar si el usuario existe | Se mantiene | 11 |
+
+**Decisión del estudiante:** cualquiera puede crear su propia cuenta y cargar semillas sin ser administrador. Esto no se cambió. Sí se conservan las restricciones por rol para menús, indicadores y administración.
+
+**Pendiente de decisión:** los accesos `--demo` y `--listar` de `main.py` funcionan sin iniciar sesión. Se dejaron como están hasta que el estudiante decida si deben pedir login de administrador.
