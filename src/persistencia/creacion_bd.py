@@ -123,6 +123,14 @@ def crear_tablas():
                     fecha TEXT NOT NULL,
                     valor REAL NOT NULL,
                     PRIMARY KEY (codigo, fecha)
+                )""",
+                """CREATE TABLE IF NOT EXISTS clima (
+                    ciudad TEXT NOT NULL,
+                    fecha TEXT NOT NULL,
+                    temperatura REAL NOT NULL,
+                    humedad REAL NOT NULL,
+                    estado TEXT NOT NULL,
+                    PRIMARY KEY (ciudad, fecha)
                 )"""
             ]
         else:
@@ -181,6 +189,14 @@ def crear_tablas():
                     fecha CHAR(10) NOT NULL,
                     valor DOUBLE NOT NULL,
                     PRIMARY KEY (codigo, fecha)
+                ) ENGINE=InnoDB""",
+                """CREATE TABLE IF NOT EXISTS clima (
+                    ciudad VARCHAR(60) NOT NULL,
+                    fecha VARCHAR(20) NOT NULL,
+                    temperatura DOUBLE NOT NULL,
+                    humedad DOUBLE NOT NULL,
+                    estado VARCHAR(60) NOT NULL,
+                    PRIMARY KEY (ciudad, fecha)
                 ) ENGINE=InnoDB"""
             ]
 

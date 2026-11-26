@@ -548,6 +548,10 @@ Una cuenta (`Usuario`) **se asocia** a un `Empleado`; no hereda de él. Autentic
 - **Persistencia:** tabla `indicador` con clave `(codigo, fecha)`: una sola fila por código y fecha; guardar de nuevo actualiza el valor.
 - **Respaldo:** si la API falla, `actualizar_uf` muestra el último dato guardado (origen «respaldo»); si no hay ninguno, informa que no hay información disponible. Solo se informa «API» después del commit.
 - **Pruebas:** `tests/test_unidad3.py` usa JSON ficticio y fallas simuladas (`mock`); no consulta la API real.
+- **Clima:** `servicios/api_clima.py` consulta `https://api.open-meteo.com/v1/forecast` (sin clave) con latitud y longitud validadas. Muestra temperatura, humedad y estado del tiempo. Está en «Indicadores económicos», opción 3. Guarda cada dato en la tabla `clima` y, si la API falla, muestra el último dato guardado de esa ciudad.
+- **Documentación de IA:** `docs/USO_DE_IA_Y_DECISIONES.md` (uso de IA y criterios) e `docs/INSTRUCCIONES_PARA_EL_GRUPO.md` (pasos para entregar).
+
+**Pendiente:** tipo de cambio (monedas internacionales) aún no está implementado; hoy solo hay UF y clima.
 
 **Limitación honesta:** en el entorno donde se preparó esta entrega, `api.boostr.cl` estaba bloqueada (403 del proxy). La consulta real a la API debe probarse en tu computador con `python src/main.py`, opción 9 → 2 (con cuenta admin).
 

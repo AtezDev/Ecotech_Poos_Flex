@@ -1,4 +1,5 @@
 from presentacion.menu_empleado import tipos_errores_bd
+from presentacion.menu_clima import menu_clima
 from servicios.indicadores import actualizar_uf, consultar_uf_guardada
 
 ORIGENES = {
@@ -25,6 +26,7 @@ def menu_indicadores(usuario_actual):
         print("\n=== INDICADORES ECONÓMICOS ===")
         print("1. Consultar UF guardada")
         print("2. Actualizar UF desde la API (solo administrador)")
+        print("3. Consultar clima (API de Open-Meteo)")
         print("0. Volver")
 
         opcion = input("Opción: ").strip()
@@ -48,6 +50,9 @@ def menu_indicadores(usuario_actual):
                 print("No se pudo completar la operación en la BD.")
             else:
                 mostrar_indicador(indicador, origen)
+
+        elif opcion == "3":
+            menu_clima(usuario_actual)
 
         elif opcion == "0":
             break
