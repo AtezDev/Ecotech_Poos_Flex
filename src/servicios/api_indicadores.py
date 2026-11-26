@@ -4,6 +4,7 @@ from dominio.indicador import Indicador
 
 URL_INDICADORES = "https://api.boostr.cl/economy/indicators.json"
 ESPERA_CONEXION = (3, 5)
+CLAVES_API = {"uf": "UF", "dolar": "DOLAR", "euro": "EURO"}
 
 
 def consultar_api():
@@ -12,20 +13,30 @@ def consultar_api():
     return respuesta.json()
 
 
+def extraer_indicadores(datos):
+    if not isinstance(datos, dict) or datos.get("status") != "success":
+        raise ValueError("La API no respondió con éxito.")
+
+    contenido = datos.get("data")
+
+    if not isinstance(contenido, dict):
+        raise ValueError("La API no entregó datos.")
+
+    indicadores = []
+
+    for clave, codigo in CLAVES_API.items():
+        bloque = contenido.get(clave)
+
+        if not isinstance(bloque, dict):
+            raise ValueError(f"La API no entregó {codigo}.")
+
+        indicadores.append(Indicador(codigo, bloque.get("date"), bloque.get("value")))
+
+    return indicadores
+
+
 def extraer_primero(datos):
-    if not isinstance(datos, dict):
-        raise ValueError("Respuesta inesperada de la API.")
-
-    serie = datos.get("serie")
-
-    if not isinstance(serie, list) or not serie or not isinstance(serie[0], dict):
-        raise ValueError("La API no entregó una serie de valores.")
-
-    primero = serie[0]
-    fecha_publicada = primero.get("fecha")
-
-    if not isinstance(fecha_publicada, str):
-        raise ValueError("La API no entregó la fecha del valor.")
-
-    # La fecha es la del dato publicado, no la de hoy: se conservan los 10 primeros caracteres.
-    return Indicador(datos.get("codigo"), fecha_publicada[:10], primero.get("valor"))
+    for indicador in extraer_indicadores(datos):
+        if indicador.codigo == "UF":
+            return indicador
+    raise ValueError("La API no entregó UF.")

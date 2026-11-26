@@ -3,7 +3,7 @@ from datetime import date
 
 
 class Indicador:
-    CODIGOS_VALIDOS = ("UF",)
+    CODIGOS_VALIDOS = ("UF", "DOLAR", "EURO")
 
     def __init__(self, codigo, fecha, valor):
         self.codigo = self.validar_codigo(codigo)

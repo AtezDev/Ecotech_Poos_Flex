@@ -30,8 +30,14 @@ from servicios.permisos import exigir_admin, exigir_sesion
 CLAVE_ADMIN = 'Clave admin de prueba 2026!'
 CLAVE_LUIS = 'Clave de Luis para prueba 2026'
 JSON_FICTICIO = {
-    'codigo': 'uf',
-    'serie': [{'fecha': '2026-01-05T03:00:00.000Z', 'valor': 40000.0}],
+    'status': 'success',
+    'data': {
+        'dolar': {'date': '2026-01-05', 'value': 900.5},
+        'uf': {'date': '2026-01-05', 'value': 40000.0},
+        'euro': {'date': '2026-01-05', 'value': 950.25},
+        'utm': {'date': '2026-01-01', 'value': 70000},
+        'ipc': {'date': '2026-01-01', 'value': 0.3},
+    },
 }
 
 
@@ -139,8 +145,7 @@ class TestUnidad3(unittest.TestCase):
         self.assertEqual(indicador.valor, 40000.0)
 
     def test_09_extraer_primero_rechaza_estructura_incompleta(self):
-        for datos in ({}, {'codigo': 'uf', 'serie': []},
-                      {'codigo': 'uf', 'serie': [{'fecha': '2026-01-05'}]}):
+        for datos in ({}, {'status': 'error'}, {'status': 'success', 'data': {'uf': {'date': '2026-01-05'}}}):
             with self.subTest(datos=datos):
                 with self.assertRaises((ValueError, TypeError)):
                     extraer_primero(datos)
@@ -218,7 +223,7 @@ class TestUnidad3(unittest.TestCase):
         with mock.patch('servicios.indicadores.consultar_api',
                         side_effect=requests.ConnectionError('sin red')):
             salida = ejecutar(lambda: menu_principal(self.admin), ['9', '2', '0', '0'])
-        self.assertIn('No hay información disponible para la UF.', salida)
+        self.assertIn('No hay información disponible para UF.', salida)
 
 
 if __name__ == '__main__':
