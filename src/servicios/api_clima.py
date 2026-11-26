@@ -1,6 +1,7 @@
 import requests
 
 from dominio.clima import Clima
+from servicios.api_indicadores import validar_respuesta_http
 
 URL_CLIMA = "https://api.open-meteo.com/v1/forecast"
 ESPERA_CONEXION = (3, 5)
@@ -13,7 +14,7 @@ def consultar_api_clima(latitud, longitud):
         "current": "temperature_2m,relative_humidity_2m,weather_code",
     }
     respuesta = requests.get(URL_CLIMA, params=parametros, timeout=ESPERA_CONEXION)
-    respuesta.raise_for_status()
+    validar_respuesta_http(respuesta)
     return respuesta.json()
 
 

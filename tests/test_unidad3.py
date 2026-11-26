@@ -21,7 +21,7 @@ from persistencia.indicador_dao import IndicadorDAO
 from persistencia.semillas import asegurar_admin_inicial, cargar_semillas
 from persistencia.usuario_dao import UsuarioDAO
 from presentacion.menu_principal import menu_principal
-from servicios.api_indicadores import URL_INDICADORES, extraer_primero
+from servicios.api_indicadores import URL_INDICADORES, extraer_primero, validar_respuesta_http
 from servicios.api_indicadores import consultar_api
 from servicios.autenticacion import autenticar, crear_cuenta
 from servicios.indicadores import actualizar_uf, consultar_uf_guardada
@@ -152,18 +152,23 @@ class TestUnidad3(unittest.TestCase):
 
     # Cliente HTTP con espera acotada y fallas simuladas
     def test_10_consulta_usa_espera_acotada(self):
-        respuesta = mock.Mock()
+        respuesta = mock.Mock(status_code=200)
         respuesta.json.return_value = JSON_FICTICIO
         with mock.patch('servicios.api_indicadores.requests.get', return_value=respuesta) as get:
             self.assertEqual(consultar_api(), JSON_FICTICIO)
         get.assert_called_once_with(URL_INDICADORES, timeout=(3, 5))
-        respuesta.raise_for_status.assert_called_once()
+
+    def test_11b_codigos_http_se_validan(self):
+        for codigo, mensaje in ((404, 'no encontró'), (500, 'error interno'), (418, 'inesperado')):
+            respuesta = mock.Mock(status_code=codigo)
+            with self.subTest(codigo=codigo):
+                with self.assertRaisesRegex(ValueError, mensaje):
+                    validar_respuesta_http(respuesta)
 
     def test_11_error_http_se_propaga_al_servicio(self):
-        respuesta = mock.Mock()
-        respuesta.raise_for_status.side_effect = requests.HTTPError('503')
+        respuesta = mock.Mock(status_code=503)
         with mock.patch('servicios.api_indicadores.requests.get', return_value=respuesta):
-            with self.assertRaises(requests.HTTPError):
+            with self.assertRaisesRegex(ValueError, 'error interno'):
                 consultar_api()
 
     # Servicio: API, respaldo y permisos

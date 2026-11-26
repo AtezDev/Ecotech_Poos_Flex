@@ -549,9 +549,9 @@ Una cuenta (`Usuario`) **se asocia** a un `Empleado`; no hereda de él. Autentic
 - **Respaldo:** si la API falla, `actualizar_uf` muestra el último dato guardado (origen «respaldo»); si no hay ninguno, informa que no hay información disponible. Solo se informa «API» después del commit.
 - **Pruebas:** `tests/test_unidad3.py` usa JSON ficticio y fallas simuladas (`mock`); no consulta la API real.
 - **Clima:** `servicios/api_clima.py` consulta `https://api.open-meteo.com/v1/forecast` (sin clave) con latitud y longitud validadas. Muestra temperatura, humedad y estado del tiempo. Está en «Indicadores económicos», opción 3. Guarda cada dato en la tabla `clima` y, si la API falla, muestra el último dato guardado de esa ciudad.
-- **Documentación de IA:** `docs/USO_DE_IA_Y_DECISIONES.md` (uso de IA y criterios) e `docs/INSTRUCCIONES_PARA_EL_GRUPO.md` (pasos para entregar).
+- **Documentación de IA:** `docs/USO_DE_IA_Y_DECISIONES.md` (uso de IA y criterios) e `docs/INSTRUCCIONES_ENTREGA.md` (pasos para entregar) y `docs/DEFENSA_INDIVIDUAL.md` (preparación de la defensa).
 
-**Pendiente:** tipo de cambio (monedas internacionales) aún no está implementado; hoy solo hay UF y clima.
+**Indicadores:** UF, dólar y euro se consultan desde la misma API (`data.uf`, `data.dolar`, `data.euro`).
 
 **Limitación honesta:** en el entorno donde se preparó esta entrega, `api.boostr.cl` estaba bloqueada (403 del proxy). La consulta real a la API debe probarse en tu computador con `python src/main.py`, opción 9 → 2 (con cuenta admin).
 
@@ -566,8 +566,8 @@ El diagrama se conserva en tres vistas: **(1) modelo de clases**, **(2) relacion
 | **Proyecto** | `nombre`, `descripcion`, `fechaInicio`, operaciones de creación/modificación/eliminación previstas. | Objeto, cambios de atributos y **CRUD SQL** (registrar, listar, buscar, actualizar nombre, descripción y fecha, eliminar). Los métodos `crearProyecto`, `modificarProyecto` y `eliminarProyecto` **siguen sin existir como métodos de la clase**: los cubren el DAO y el menú. |
 | **RegistroTiempo** | `fecha`, `horasTrabajadas`, `descripcionTarea`, relación con Empleado y Proyecto. | Objeto, validaciones, asociación, inserción condicionada a proyecto asignado y **CRUD SQL** (listar, buscar, actualizar fecha/horas/tarea, eliminar). |
 | **Informe** | Generar informes de empleados, departamentos, proyectos y registros de tiempo; recibe `ControlAcceso`. | **Pendiente** en Python. |
-| **CuentaUsuario** | Nombre de usuario, información protegida de contraseña, sal y rol; comprobación de credenciales. | **Pendiente** en Python. |
-| **ControlAcceso** | Autenticación, autorización, sesión y usuario autenticado. | **Pendiente** en Python. |
+| **CuentaUsuario** | Nombre de usuario, contraseña protegida (hash bcrypt), rol y comprobación de credenciales. | **Implementada** en Python (sin tabla de sal separada: bcrypt la incluye en el hash). |
+| **ControlAcceso** | Autenticación, autorización, sesión y usuario autenticado. | **Parcial**: autenticación y permisos por rol (`servicios/permisos.py`) están; falta una clase propia con sesión. |
 
 Algunos métodos del UML, como `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento`, `eliminarDepartamento`, `crearProyecto`, `modificarProyecto` y `eliminarProyecto`, **no están completos**. No se deben presentar como implementados solo porque existan métodos para cambiar atributos o una operación de inserción.
 

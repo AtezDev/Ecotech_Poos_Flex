@@ -7,9 +7,21 @@ ESPERA_CONEXION = (3, 5)
 CLAVES_API = {"uf": "UF", "dolar": "DOLAR", "euro": "EURO"}
 
 
+def validar_respuesta_http(respuesta):
+    codigo = respuesta.status_code
+
+    if codigo == 200:
+        return
+    if codigo == 404:
+        raise ValueError("La API no encontró el recurso (404).")
+    if codigo >= 500:
+        raise ValueError(f"La API tuvo un error interno ({codigo}).")
+    raise ValueError(f"La API respondió con código inesperado ({codigo}).")
+
+
 def consultar_api():
     respuesta = requests.get(URL_INDICADORES, timeout=ESPERA_CONEXION)
-    respuesta.raise_for_status()
+    validar_respuesta_http(respuesta)
     return respuesta.json()
 
 

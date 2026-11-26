@@ -9,8 +9,8 @@ El objetivo de esta carpeta es aprender **sin eliminar nada del UML**. Los ejemp
 | Proyecto | Nombre/descripcion/fecha, cambios y getters. CRUD SQL completo en `ProyectoDAO` y `menu_proyecto.py`. **Pendientes UML:** `crearProyecto`, `modificarProyecto`, `eliminarProyecto` como **métodos de la clase** |
 | RegistroTiempo | Fecha/horas/descripcion, getters/cambios, asociación a Empleado–Proyecto, registro en BD y CRUD SQL completo (`menu_registro_tiempo.py`) |
 | Informe | **Pendiente de futuras clases**: los cuatro métodos de generación y la dependencia de `ControlAcceso` |
-| CuentaUsuario | **Pendiente**: nombre de usuario, hash de contraseña, sal, rol y verificación |
-| ControlAcceso | **Pendiente**: autenticar, autorizar, cerrar sesión |
+| CuentaUsuario | **Implementada**: nombre de usuario, hash bcrypt, rol y verificación (la sal va dentro del hash de bcrypt) |
+| ControlAcceso | **Parcial**: autenticar y autorizar (`servicios/permisos.py`) están; falta cerrar sesión como clase propia |
 
 **Importante:** el UML contiene siete clases, pero el alcance de las diapositivas revisadas todavía no enseña el sistema de autenticación e informes. No hay implementaciones ficticias de seguridad ni se presenta esta carpeta como el sistema final completo.
 

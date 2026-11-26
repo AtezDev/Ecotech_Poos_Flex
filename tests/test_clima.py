@@ -71,13 +71,12 @@ class TestClima(unittest.TestCase):
             extraer_clima({'current': {'time': 'x', 'weather_code': 'x'}}, 'La Serena')
 
     def test_04_consulta_usa_espera_acotada(self):
-        respuesta = mock.Mock()
+        respuesta = mock.Mock(status_code=200)
         respuesta.json.return_value = JSON_CLIMA
         with mock.patch('servicios.api_clima.requests.get', return_value=respuesta) as get:
             consultar_api_clima(-29.9, -71.2)
         self.assertEqual(get.call_args.args[0], URL_CLIMA)
         self.assertEqual(get.call_args.kwargs['timeout'], (3, 5))
-        respuesta.raise_for_status.assert_called_once()
 
     def test_05_consulta_guarda_y_respalda(self):
         with mock.patch('servicios.clima.consultar_api_clima', return_value=JSON_CLIMA):
