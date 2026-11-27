@@ -12,7 +12,7 @@ Las pruebas de la API real se hicieron en el computador del estudiante, porque e
 
 El estudiante mantuvo la responsabilidad de coordinar el trabajo entre herramientas, revisar las propuestas, decidir qué incorporar y comprobar los cambios en su entorno. Que una respuesta haya sido propuesta por una IA no la hace correcta por sí sola.
 
-En la Unidad 3, el flujo fue este: el asistente propuso los cambios y las pruebas; el estudiante los copió al proyecto, ejecutó las pruebas y el programa en su computador, reportó los resultados y pidió correcciones cuando algo no funcionó. Los commits y los `push` a GitHub del proyecto fueron realizados por el estudiante. En la última etapa (27 de noviembre), el asistente ejecutó algunos de ellos a pedido del estudiante y con su autorización, y el estudiante los revisó antes de subirlos.
+En la Unidad 3, el flujo fue este: el asistente propuso los cambios y las pruebas; el estudiante los copió al proyecto, ejecutó las pruebas y el programa en su computador, reportó los resultados y pidió correcciones cuando algo no funcionó. Los commits y los `push` a GitHub del proyecto los hizo el estudiante. El asistente ejecutó solo dos o tres, en la última etapa, a pedido del estudiante.
 
 ## 2. Apoyo de ChatGPT durante el aprendizaje y desarrollo
 
@@ -37,7 +37,7 @@ Una mejora detectada se presentaba como alternativa para analizar, no como cambi
 
 ## 3. Trabajo con Claude en la Unidad 3
 
-Claude participó de forma intensiva en la implementación de la Unidad 3:
+Claude propuso y escribió la mayor parte del código y de las pruebas de la Unidad 3, a partir de las preguntas del estudiante y del material de clase que él entregaba. El estudiante decidió qué incorporar, ejecutó las pruebas en su computador y pidió los ajustes. Los cambios de la Unidad 3 incluyeron:
 - Roles `admin` y `empleado`, con su migración y permisos (`servicios/permisos.py`).
 - Integración de la API de indicadores (UF, dólar, euro) y de la API de clima (Open-Meteo).
 - Respaldo local cuando la API falla.
@@ -139,7 +139,7 @@ Este documento describe el proceso de colaboración y aprendizaje, pero no prese
 
 Las conversaciones disponibles pueden asociarse con los archivos y cambios del repositorio: revisiones de código, explicaciones de arquitectura y DAO, análisis del UML, consultas sobre Git/GitHub y revisiones posteriores a cambios del estudiante. No se inventan fechas, prompts textuales, pruebas ni modificaciones que no estén respaldadas.
 
-**Pendiente de completar por el estudiante:** su propio relato de las consultas a ChatGPT en clase, con ejemplos concretos de lo que preguntó, qué respuesta obtuvo y cómo la evaluó, y la respuesta del profesor en sus propias palabras. Esta sección no reemplaza ese relato.
+Los relatos del estudiante sobre sus consultas a ChatGPT son los de las secciones 2.1 a 2.5. No se agregan prompts textuales que no estén respaldados.
 
 ## 10. Pendientes que el estudiante debe revisar
 - Confirmar con el profesor que el empleado puede modificar su dirección, teléfono y correo, y que nombre, salario, fecha de contrato e ID no se modifican.
