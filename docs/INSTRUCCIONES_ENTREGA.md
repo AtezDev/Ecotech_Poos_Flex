@@ -19,7 +19,7 @@ No se aceptan entregas por correo. Después de la entrega viene la defensa indiv
 
 ## 3. Qué debe contener la carpeta
 - `src/`, `tests/`, `docs/`, `Readme.md`, `requirements.txt` y `.env.example`.
-- No incluir `.env`, `.git`, `.venv`, `__pycache__`, `*.db` ni el archivo `ecotech`.
+- No incluir `.env`, `.git`, `.venv`, `__pycache__`, `*.db`, el archivo `ecotech` ni `docs/prueba.txt`. Ninguno de estos archivos se evalúa: la guía y la escala de apreciación no los mencionan.
 
 ## 4. Revisión final antes de subir
 - [ ] Las 218 pruebas pasan.
