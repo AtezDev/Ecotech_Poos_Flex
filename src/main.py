@@ -131,11 +131,11 @@ def main():
         crear_tablas()
 
     except ValueError as error:
-        print("No se pudo preparar la base:", error)
+        print("No se pudo preparar la base: revisa ADMIN_PASSWORD y DB_* en .env.")
         return
 
     except (IntegrityError, OperationalError) as error:
-        print("No se pudo preparar la base de datos:", error)
+        print("No se pudo preparar la base de datos. Revisa la configuración en .env.")
         return
 
     if len(sys.argv) == 2 and sys.argv[1] == "--demo":
