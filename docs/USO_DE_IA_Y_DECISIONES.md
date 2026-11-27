@@ -1,17 +1,53 @@
-# Uso de herramientas de IA y decisiones técnicas
+# Uso de herramientas de IA y decisiones técnicas — EcoTech Solutions
 
-Este documento registra el proceso de trabajo con las herramientas de IA: ChatGPT en etapas anteriores del proyecto y Claude en la Unidad 3 (clima, indicadores y roles). Ver también la sección 8.
-Quien toma las decisiones es el estudiante: cada cambio se propuso, se probó en su computador y se aceptó o se descartó.
+Este documento registra el uso de herramientas de IA en el desarrollo de EcoTech Solutions. El trabajo fue individual: el estudiante estudió cada clase, revisó las propuestas, decidió cuáles aceptar, modificar o descartar, y ejecutó y verificó los cambios en su propio computador.
+
+Dos herramientas participaron, en etapas distintas:
+- **ChatGPT** acompañó el aprendizaje y la revisión progresiva del código durante las primeras clases, y luego en la comprensión de Git/GitHub, la arquitectura y la correspondencia con el UML.
+- **Claude** escribió la mayor parte de los cambios y pruebas de la Unidad 3 (clima, indicadores, roles, validaciones). El estudiante los copió, los ejecutó, los ajustó cuando hizo falta y decidió qué quedaba.
+
 Las pruebas de la API real se hicieron en el computador del estudiante, porque el entorno del asistente no tenía acceso a la API.
 
-## 1. Cómo se trabajó
-- El asistente revisó el material de clase (diapositivas de Clase 6 y Clase 7, y la guía de estudio) y propuso la estructura de cambios.
-- El asistente escribió los cambios y las pruebas en su entorno y entregó carpetas actualizadas.
-- El estudiante copió los cambios, ejecutó las pruebas y el programa en su computador, y reportó resultados.
-- El estudiante hizo los commits y los `push` a GitHub.
-- Cuando algo no funcionó, el asistente propuso una corrección y el estudiante decidió si se aplicaba.
+## 1. Enfoque de trabajo y responsabilidad del estudiante
 
-## 2. Registro de decisiones
+El estudiante mantuvo la responsabilidad de coordinar el trabajo entre herramientas, revisar las propuestas, decidir qué incorporar y comprobar los cambios en su entorno. Que una respuesta haya sido propuesta por una IA no la hace correcta por sí sola.
+
+En la Unidad 3, el flujo fue este: el asistente propuso los cambios y las pruebas; el estudiante los copió al proyecto, ejecutó las pruebas y el programa en su computador, reportó los resultados y pidió correcciones cuando algo no funcionó. Los commits y los `push` a GitHub fueron ejecutados por el asistente, a pedido y con autorización del estudiante, y revisados por él antes de subirlos.
+
+## 2. Apoyo de ChatGPT durante el aprendizaje y desarrollo
+
+### 2.1 Revisión progresiva del código según los contenidos de clases
+En las primeras etapas, el estudiante compartía el avance y pedía una revisión basada en lo que había aprendido hasta ese momento. ChatGPT ayudaba a examinar la lógica, explicar por qué una instrucción o estructura funcionaba de cierta manera y señalar posibles errores, omisiones o mejoras. Cuando aparecía una mejora, primero se analizaba su propósito y funcionamiento; el estudiante evaluaba si correspondía aplicarla según los requerimientos y su comprensión de la materia.
+
+Así se trabajó de forma incremental: estudiar el concepto, revisar cómo se reflejaba en el proyecto, entender la lógica de un cambio, implementarlo personalmente y pedir después una nueva revisión para comprobar que había quedado coherente.
+
+### 2.2 Aprendizaje de Git, GitHub y organización del repositorio
+ChatGPT apoyó el aprendizaje del flujo de trabajo con Git y GitHub: consultar el estado del repositorio, registrar cambios, preparar confirmaciones (*commits*), trabajar con la rama y publicar avances. También se estudió la organización del repositorio: propósito de cada carpeta, ubicación de los módulos y relación entre archivos.
+
+El propósito fue que el estudiante entendiera qué hacía cada comando y cómo se reflejaba en el historial y en el repositorio remoto, en lugar de copiar instrucciones sin comprenderlas.
+
+### 2.3 Revisión del UML y correspondencia con las clases
+Clase a clase se revisó el modelo UML y su relación con la implementación en Python: qué representa cada clase, sus atributos y métodos, sus relaciones y qué debía comprobarse en el código para mantener coherencia con el diseño. El diagrama UML original se mantuvo como referencia; las revisiones del código no se usaron para alterar ese modelo.
+
+### 2.4 Comprensión de la arquitectura y del patrón DAO
+Se estudió la separación de responsabilidades: por qué el acceso a datos se separa de las clases del dominio, y cómo se relacionan la presentación, los servicios, las entidades, los DAO y la conexión con la base de datos. Las explicaciones se relacionaron con ejemplos del propio proyecto para que el estudiante pudiera justificar la arquitectura.
+
+### 2.5 Propuestas de mejora y validación posterior
+Una mejora detectada se presentaba como alternativa para analizar, no como cambio automático: se explicaba el problema, la lógica de la propuesta, sus ventajas y sus posibles efectos en el resto del proyecto. Si el estudiante decidía implementarla, después pedía una nueva revisión para confirmar la coherencia del cambio, detectar errores introducidos y verificar que correspondía a lo esperado.
+
+## 3. Trabajo con Claude en la Unidad 3
+
+Claude participó de forma intensiva en la implementación de la Unidad 3:
+- Roles `admin` y `empleado`, con su migración y permisos (`servicios/permisos.py`).
+- Integración de la API de indicadores (UF, dólar, euro) y de la API de clima (Open-Meteo).
+- Respaldo local cuando la API falla.
+- Validación de entradas y manejo de errores.
+- Pruebas automatizadas de esas funciones (218 pruebas en la suite actual).
+- Documentación de verificación (`docs/VERIFICACION_UML_ORIGINAL.md`).
+
+Las propuestas se aplicaban como cambios que el estudiante probaba en su computador. Cuando algo fallaba, el asistente proponía una corrección y el estudiante decidía.
+
+## 4. Registro de decisiones (Unidad 3)
 
 | Fecha | Propuesta del asistente | Decisión del estudiante | Resultado |
 |---|---|---|---|
@@ -20,20 +56,22 @@ Las pruebas de la API real se hicieron en el computador del estudiante, porque e
 | 24-nov | Tabla `indicador` con clave `(codigo, fecha)` para no duplicar datos | Aceptada | Prueba de guardar dos veces: una sola fila |
 | 24-nov | Respaldo local cuando la API falla | Aceptada | Pruebas con fallas simuladas OK |
 | 25-nov | Menú del empleado con ficha, indicadores y cuenta | Aceptada | Implementada |
-| 27-nov | Opción «Modificar mis datos» para el empleado: dirección, teléfono y correo (nombre, salario, fecha e ID no se cambian) | Pedida por el estudiante | Implementada con validadores y pruebas (`test_mis_datos.py`) |
-| 27-nov | Verificar correo repetido al modificar datos, en el admin y en el empleado | Aceptada | Pruebas 07 y 08 de `test_mis_datos.py` |
-| 27-nov | Ocultar el detalle técnico de errores al arrancar la base de datos | Aceptada | `test_errores_seguros.py` |
 | 26-nov | Módulo de clima con Open-Meteo (sin clave) | Aceptada | Funciona en el computador del estudiante |
 | 26-nov | Adaptador de la API ajustado al formato real (`data.uf`, `data.dolar`, `data.euro`) | Aceptada tras la prueba real del estudiante | UF, dólar y euro guardados y consultados |
 | 26-nov | Agregar dólar y euro (tipo de cambio) | Aceptada | Pruebas OK y consulta real OK |
+| 27-nov | Opción «Modificar mis datos» para el empleado: dirección, teléfono y correo (nombre, salario, fecha e ID no se cambian) | Pedida por el estudiante | Implementada con validadores y pruebas (`test_mis_datos.py`) |
+| 27-nov | Verificar correo repetido al modificar datos, en el admin y en el empleado | Aceptada | Pruebas 07 y 08 de `test_mis_datos.py` |
+| 27-nov | Ocultar el detalle técnico de errores al arrancar la base de datos | Aceptada | `test_errores_seguros.py` |
 
-## 3. Código revisado y cambiado tras la revisión
+## 5. Código revisado y fragmentos apoyados por IA
+
+### 5.1 Correcciones tras revisión
 - **Adaptador de la API.** El primer diseño seguía el ejemplo de la diapositiva (`codigo` y `serie`). La respuesta real tiene otra forma (`status` y `data`). El fallo se detectó en la prueba real del estudiante y se corrigió. Criterio: la prueba con el servicio real vale más que el ejemplo de la diapositiva.
-- **Clave del administrador.** Se leen desde `.env` (`ADMIN_PASSWORD`) y no se escriben en el código. Criterio: seguridad y no exponer credenciales.
+- **Clave del administrador.** Se lee desde `.env` (`ADMIN_PASSWORD`) y no se escribe en el código. Criterio: no exponer credenciales.
 - **Contraseñas.** Se guardan con bcrypt. Criterio: no guardar contraseñas en texto plano.
-- **Mensajes de error.** No muestran trazas técnicas ni rutas. Criterio: no exponer información sensible al usuario.
+- **Mensajes de error.** No muestran trazas técnicas ni rutas. Criterio: no exponer información sensible al usuario. El arranque de la base ya no imprime el error técnico completo.
 
-## 3b. Fragmentos apoyados por IA y decisión tomada
+### 5.2 Fragmentos apoyados por IA y decisión tomada
 
 | Fragmento | Origen | Decisión | Criterio técnico |
 |---|---|---|---|
@@ -43,14 +81,40 @@ Las pruebas de la API real se hicieron en el computador del estudiante, porque e
 | `src/presentacion/menu_clima.py` (`solicitar_numero`) | Propuesta del asistente | Aceptado y reforzado | Rechaza vacío, texto, `nan`, `inf` y valores fuera de rango |
 | Respaldo local de la API (`servicios/indicadores.py`, `servicios/clima.py`) | Propuesta del asistente | Aceptado | Muestra el último dato guardado; no consulta otra API |
 
-## 4. Pendientes que el estudiante debe revisar
-- Confirmar con el profesor que el empleado puede modificar su dirección, teléfono y correo, y que nombre, salario, fecha de contrato e ID no se modifican.
-- Confirmar que la modalidad de trabajo es individual (ver `docs/INSTRUCCIONES_ENTREGA.md`).
-- Ejecutar las pruebas en el computador antes de subir la entrega.
+## 6. Aportes y límites de cada herramienta
 
-## 5. Revisión de validación de entradas (26-nov, última sesión)
+**ChatGPT** cumplió sobre todo una función de tutoría técnica, análisis y revisión iterativa:
+- Explicación de conceptos de POO y revisión de su aplicación en las clases del proyecto.
+- Revisión del código del estudiante según los contenidos de cada etapa.
+- Análisis de la lógica de métodos, atributos, constructores y relaciones entre clases.
+- Explicación de la separación por capas y del rol de los DAO.
+- Apoyo para comprender Git, GitHub y la organización del repositorio.
+- Revisión de la correspondencia entre el UML original y la implementación.
+- Análisis de alternativas de implementación, explicando su fundamento antes de que el estudiante decidiera.
+- Revisión externa de la documentación de entrega.
 
-Pedido del estudiante: que todas las entradas del programa se validen y que ningún dato vacío, con caracteres no válidos o fuera de rango haga caer el programa o avance al paso siguiente.
+**Claude** escribió la mayor parte de los cambios y pruebas de la Unidad 3, y los documentos de verificación. Ejecutó pruebas en su entorno de trabajo, no en el equipo del estudiante.
+
+**Lo que ninguna de las dos herramientas hizo:**
+- No ejecutaron las pruebas ni el programa en el equipo del estudiante. Las pruebas en Windows y en MySQL/WampServer las debe repetir el estudiante.
+- No se atribuye a ninguna de las dos la autoría exclusiva del proyecto ni decisiones que tomó el estudiante.
+
+## 7. Criterios para evaluar propuestas de IA
+
+Las propuestas se analizaron según el caso:
+1. **Correspondencia con los requerimientos:** si resolvían una necesidad real de la evaluación y del sistema.
+2. **Comprensión:** si el estudiante podía explicar qué hacía el cambio y por qué era necesario.
+3. **Coherencia arquitectónica:** si respetaban las responsabilidades de las clases y capas existentes.
+4. **Compatibilidad:** si se integraban con el código, la base de datos y el flujo existente.
+5. **Seguridad y validación:** si evitaban exponer información sensible, aceptar entradas inválidas o permitir operaciones no autorizadas.
+6. **Mantenibilidad:** si reducían duplicación o complejidad sin introducir abstracciones innecesarias.
+7. **Verificación:** si el resultado podía revisarse por lectura del código, ejecución o pruebas.
+
+Cuando una propuesta no se ajustaba al diseño, excedía los contenidos o requerimientos, o no podía justificarse, se modificaba o se descartaba. La decisión final fue del estudiante.
+
+## 8. Validación de entradas y decisiones de acceso
+
+Pedido del estudiante: que todas las entradas se validen y que ningún dato vacío, con caracteres no válidos o fuera de rango haga caer el programa o avance al paso siguiente.
 
 | Entrada | Problema encontrado | Corrección | Prueba |
 |---|---|---|---|
@@ -63,34 +127,26 @@ Pedido del estudiante: que todas las entradas del programa se validen y que ning
 | Salario y horas | Mismo riesgo con `²` | Se rechaza y se vuelve a pedir | 12 |
 | Login con usuario vacío | Se rechaza con mensaje genérico, sin revelar si el usuario existe | Se mantiene | 11 |
 
-**Decisión del estudiante:** cualquiera puede crear su propia cuenta y cargar semillas sin ser administrador. Esto no se cambió. Sí se conservan las restricciones por rol para menús, indicadores y administración.
+**Decisión del estudiante:** cualquiera puede crear su propia cuenta y cargar semillas sin ser administrador. Se conservan las restricciones por rol para menús, indicadores y administración.
 
-**Decisión tomada:** los accesos `--demo` y `--listar` de `main.py` funcionan sin iniciar sesión y se documentan como comandos de desarrollo (riesgos y uso permitido en `Readme.md`, sección de comandos). No se agrega login ni un rol `sys` por ahora.
+**Decisión del estudiante:** los accesos `--demo` y `--listar` de `main.py` funcionan sin iniciar sesión y se documentan como comandos de desarrollo (riesgos y uso permitido en `Readme.md`). No se agrega login ni un rol `sys` por ahora.
 
-## 8. Colaboración con ChatGPT y Claude en la Evaluación 2
+**Decisión del estudiante:** el empleado puede modificar su dirección, teléfono y correo; nombre, salario, fecha de contrato e ID no se modifican desde su menú.
 
-Este trabajo fue hecho en colaboración. Ninguna herramienta trabajó sola, y las decisiones finales fueron del estudiante.
+## 9. Evidencia y transparencia
 
-**ChatGPT** participó en etapas anteriores del proyecto:
-- Explicación de POO, UML y la separación en capas (dominio, persistencia, servicios, presentación).
-- Diseño del CRUD, de la persistencia y de las semillas sin duplicados.
-- Autenticación con bcrypt, y depuración de duplicados y del menú.
-- Diseño de pruebas, revisión del repositorio y de los envíos.
-- Orientación sobre APIs y roles.
-- Revisión documental del paquete de revisión de esta entrega.
+Este documento describe el proceso de colaboración y aprendizaje, pero no presenta estas descripciones como transcripciones literales de prompts. Los mensajes exactos solo deben citarse cuando se disponga de su registro original.
 
-**Claude** participó en la implementación de la Unidad 3:
-- Roles `admin` y `empleado`, con su migración y permisos.
-- Integración de la API de indicadores (UF, dólar, euro) y de la API de clima.
-- Respaldo local cuando la API falla.
-- Validación de entradas y manejo de errores.
-- Pruebas automatizadas (218 en la suite actual).
-- Documentación de verificación (`docs/VERIFICACION_UML_ORIGINAL.md`).
+Las conversaciones disponibles pueden asociarse con los archivos y cambios del repositorio: revisiones de código, explicaciones de arquitectura y DAO, análisis del UML, consultas sobre Git/GitHub y revisiones posteriores a cambios del estudiante. No se inventan fechas, prompts textuales, pruebas ni modificaciones que no estén respaldadas.
 
-**Lo que ChatGPT y Claude no hicieron:**
-- No ejecutaron las pruebas en el equipo del estudiante. Las pruebas se corrieron en un entorno Linux de trabajo y el estudiante debe repetirlas en Windows.
-- No crearon commits con la identidad del estudiante. Los commits fueron revisados y autorizados por él antes de subirse.
+**Pendiente de completar por el estudiante:** su propio relato de las consultas a ChatGPT en clase, con ejemplos concretos de lo que preguntó, qué respuesta obtuvo y cómo la evaluó, y la respuesta del profesor en sus propias palabras. Esta sección no reemplaza ese relato.
 
-**Decisiones del estudiante:** la forma de los menús y del registro abierto; los roles (sin rol `sys`); dejar `--demo` y `--listar` como comandos de desarrollo sin login; y qué entrega final se sube.
+## 10. Pendientes que el estudiante debe revisar
+- Confirmar con el profesor que el empleado puede modificar su dirección, teléfono y correo, y que nombre, salario, fecha de contrato e ID no se modifican.
+- Ejecutar las pruebas en Windows y probar MySQL/WampServer antes de subir la entrega.
 
-**Pendiente de completar por el estudiante:** su propio relato de consultas con ChatGPT en clase y la respuesta del profesor, en sus propias palabras. Esta sección no reemplaza ese relato.
+## 11. Reflexión del estudiante
+
+El uso de IA fue parte de un proceso de aprendizaje progresivo. La utilidad principal no fue obtener código para copiar, sino contar con explicaciones y revisiones que permitieran entender lo desarrollado en clases y relacionarlo con un proyecto real. El estudiante contrastó las propuestas con lo aprendido, preguntó por la lógica de las soluciones, decidió cuáles tenían sentido y realizó los cambios que consideró pertinentes.
+
+La responsabilidad por el resultado final y por las decisiones adoptadas permaneció en el estudiante.

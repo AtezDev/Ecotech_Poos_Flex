@@ -36,4 +36,4 @@ Cada pregunta indica dónde está la respuesta en el código. Antes de la defens
 - **¿Por qué el registro está abierto?** Así lo decidió el estudiante. Cualquiera puede crear cuenta con un ID de empleado existente, y recibe rol `empleado`.
 - **¿Qué hacen `--demo` y `--listar`?** Son comandos de desarrollo sin login. `--listar` expone datos personales y `--demo` escribe datos de ejemplo. Solo se usan en la base de práctica.
 - **¿Qué parte del UML original falta implementar?** `Informe` (solo dos de sus cuatro métodos) y `ControlAcceso` como clase única. Ver `docs/VERIFICACION_UML_ORIGINAL.md`.
-- **¿Qué hizo la IA en el proyecto?** Ver `docs/USO_DE_IA_Y_DECISIONES.md`, sección 8. Las decisiones fueron del estudiante.
+- **¿Qué hizo la IA en el proyecto?** Ver `docs/USO_DE_IA_Y_DECISIONES.md`, secciones 1, 3, 6 y 9. Las decisiones fueron del estudiante.
