@@ -1,6 +1,6 @@
 # Verificación contra la Guía de repaso (Objetos, persistencia y autenticación)
 
-Estado: SQLite/Linux 161/161 pruebas OK con `unittest` y `pytest`; MariaDB 10.11 (como MySQL) con la evidencia de abajo. Pendiente: tu Windows y WampServer.
+Estado histórico de la Clase 6: SQLite/Linux 161/161 pruebas OK (la suite actual tiene 209) con `unittest` y `pytest`; MariaDB 10.11 (como MySQL) con la evidencia de abajo. Pendiente: tu Windows y WampServer.
 
 | Sección de la guía | Qué pide | Dónde se cumple | Prueba |
 |---|---|---|---|
@@ -32,7 +32,7 @@ Estado: SQLite/Linux 161/161 pruebas OK con `unittest` y `pytest`; MariaDB 10.11
 | Mensajes del servicio | `print` | sin `print` en el servicio | Sin `print`; el menú muestra los mensajes. |
 
 ## Pendientes declarados
-- Permisos por rol (autorizar): próxima clase.
+- Permisos por rol (autorizar): implementados en la Clase 7.
 - Crear cuenta sin sesión previa es un arranque de clase; en un sistema real lo haría un administrador.
 - `--demo` y `--listar` no pasan por el login.
 - Probar en Windows y WampServer. En Git Bash, `getpass` puede fallar; usa `winpty python src/main.py` o la terminal de Windows.

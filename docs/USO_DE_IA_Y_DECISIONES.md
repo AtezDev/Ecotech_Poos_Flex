@@ -53,3 +53,31 @@ Pedido del estudiante: que todas las entradas del programa se validen y que ning
 **Decisión del estudiante:** cualquiera puede crear su propia cuenta y cargar semillas sin ser administrador. Esto no se cambió. Sí se conservan las restricciones por rol para menús, indicadores y administración.
 
 **Decisión tomada:** los accesos `--demo` y `--listar` de `main.py` funcionan sin iniciar sesión y se documentan como comandos de desarrollo (riesgos y uso permitido en `Readme.md`, sección de comandos). No se agrega login ni un rol `sys` por ahora.
+
+## 8. Colaboración con ChatGPT y Claude en la Evaluación 2
+
+Este trabajo fue hecho en colaboración. Ninguna herramienta trabajó sola, y las decisiones finales fueron del estudiante.
+
+**ChatGPT** participó en etapas anteriores del proyecto:
+- Explicación de POO, UML y la separación en capas (dominio, persistencia, servicios, presentación).
+- Diseño del CRUD, de la persistencia y de las semillas sin duplicados.
+- Autenticación con bcrypt, y depuración de duplicados y del menú.
+- Diseño de pruebas, revisión del repositorio y de los envíos.
+- Orientación sobre APIs y roles.
+- Revisión documental del paquete de revisión de esta entrega.
+
+**Claude** participó en la implementación de la Unidad 3:
+- Roles `admin` y `empleado`, con su migración y permisos.
+- Integración de la API de indicadores (UF, dólar, euro) y de la API de clima.
+- Respaldo local cuando la API falla.
+- Validación de entradas y manejo de errores.
+- Pruebas automatizadas (209 en la suite actual).
+- Documentación de verificación (`docs/VERIFICACION_UML_ORIGINAL.md`).
+
+**Lo que ChatGPT y Claude no hicieron:**
+- No ejecutaron las pruebas en el equipo del estudiante. Las pruebas se corrieron en un entorno Linux de trabajo y el estudiante debe repetirlas en Windows.
+- No crearon commits con la identidad del estudiante. Los commits fueron revisados y autorizados por él antes de subirse.
+
+**Decisiones del estudiante:** la forma de los menús y del registro abierto; los roles (sin rol `sys`); dejar `--demo` y `--listar` como comandos de desarrollo sin login; y qué entrega final se sube.
+
+**Pendiente de completar por el estudiante:** su propio relato de consultas con ChatGPT en clase y la respuesta del profesor, en sus propias palabras. Esta sección no reemplaza ese relato.

@@ -22,5 +22,5 @@ Comparación con la estructura que ya usan Empleados, Departamentos y Proyectos:
 ## Pendiente
 
 - Estructura: `buscar_cuenta` y `eliminar_cuenta` todavía tienen código propio en lugar de usar `buscar_uno` y `eliminar_con_confirmacion` de `menu_comun`. El comportamiento es el mismo; falta igualar la forma.
-- Roles formales (quién administra) para la próxima clase. Hoy se decide por el nombre `admin`.
+- Roles formales implementados en la Clase 7: `admin` y `empleado` (columna `usuario.rol`).
 - Protección contra tiempo de respuesta: si el usuario no existe, la respuesta tarda menos que con una clave incorrecta (ver la revisión de la Clase 6).

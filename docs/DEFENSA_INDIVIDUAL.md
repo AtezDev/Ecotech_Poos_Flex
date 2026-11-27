@@ -28,3 +28,12 @@ Cada pregunta indica dónde está la respuesta en el código. Antes de la defens
 1. ¿Qué pasa si `ADMIN_PASSWORD` no está en `.env`? (Respuesta: `asegurar_admin_inicial` lanza un `ValueError` con mensaje claro.)
 2. ¿Qué pasa si guardas dos veces UF con la misma fecha? (Respuesta: una sola fila; el valor se actualiza.)
 3. ¿Por qué el empleado no puede ver la opción de actualizar indicadores? (Respuesta: la opción aparece, pero `exigir_admin` rechaza la acción.)
+
+## Preguntas nuevas de la Unidad 3
+
+- **¿Qué pasa si la API de indicadores falla?** Se intenta con el tiempo de espera definido. Si la respuesta no es 200 válida o el JSON no tiene el formato esperado, se usa el último valor guardado en la base (origen `respaldo`). Si no hay ninguno, se muestra "no hay información disponible". Nunca se consulta otra API.
+- **¿Qué diferencia hay entre `admin` y `empleado`?** `admin` ve todos los menús, incluido administrar usuarios y actualizar indicadores. `empleado` ve su ficha, consulta indicadores, el clima y su propia cuenta.
+- **¿Por qué el registro está abierto?** Así lo decidió el estudiante. Cualquiera puede crear cuenta con un ID de empleado existente, y recibe rol `empleado`.
+- **¿Qué hacen `--demo` y `--listar`?** Son comandos de desarrollo sin login. `--listar` expone datos personales y `--demo` escribe datos de ejemplo. Solo se usan en la base de práctica.
+- **¿Qué parte del UML original falta implementar?** `Informe` (solo dos de sus cuatro métodos) y `ControlAcceso` como clase única. Ver `docs/VERIFICACION_UML_ORIGINAL.md`.
+- **¿Qué hizo la IA en el proyecto?** Ver `docs/USO_DE_IA_Y_DECISIONES.md`, sección 8. Las decisiones fueron del estudiante.

@@ -3,11 +3,11 @@
 **Proyecto académico de Analista Programador · INACAP · Programación Orientada a Objeto Seguro (TI3V21 FLEX)**  
 **Repositorio:** [AtezDev/Ecotech_Poos_Flex](https://github.com/AtezDev/Ecotech_Poos_Flex)  
 **Guía de diseño:** [`docs/audt_diagr/Diagrama_Final.drawio`](docs/audt_diagr/Diagrama_Final.drawio) — UML definitivo de **tres vistas**.  
-**Alcance documentado:** avances hasta **FLEX Unidades 2–3, Clase 4: «Menú y manejo de excepciones»**, más las implementaciones complementarias necesarias para respetar el UML y la **ampliación del CRUD a todas las entidades implementadas** (sección 4, «CRUD completo»).
+**Alcance documentado:** avances hasta **FLEX Unidad 3, Clase 7: roles, permisos y API de indicadores/clima**, incluyendo la **Clase 4: «Menú y manejo de excepciones»**, más las implementaciones complementarias necesarias para respetar el UML y la **ampliación del CRUD a todas las entidades implementadas** (sección 4, «CRUD completo»).
 
 **Estado de GitHub comprobado al preparar esta carpeta:** rama `main`, último commit visible `03308d6` (*Actualizacion CRUD*, 17 de noviembre de 2026). El estudiante confirmó que las **44 pruebas originales terminaron en `OK` en Windows** y que el `push` de la fusión fue exitoso.
 
-**Clase 6 (19 de noviembre):** `Usuario`, `usuario_dao.py`, `servicios/autenticacion.py` (bcrypt), `menu_usuario.py` y login previo al menú principal. Cuenta `admin` creada desde la opción 3 con `ADMIN_PASSWORD` del `.env` (el nombre `admin` está reservado), sin duplicar semillas ni cuentas (`--demo` tampoco duplica). **161 pruebas OK** en SQLite con `unittest` y `pytest`; comprobado también en MariaDB 10.11.
+**Clase 6 (19 de noviembre):** `Usuario`, `usuario_dao.py`, `servicios/autenticacion.py` (bcrypt), `menu_usuario.py` y login previo al menú principal. Cuenta `admin` creada desde la opción 3 con `ADMIN_PASSWORD` del `.env` (el nombre `admin` está reservado), sin duplicar semillas ni cuentas (`--demo` tampoco duplica). **161 pruebas OK** en la Clase 6 (SQLite); la suite actual tiene **209 pruebas OK**. Comprobado también en MariaDB 10.11 (ver `docs/VERIFICACION_UML_ORIGINAL.md` y `docs/VERIFICACION_GUIA_REPASO_CLASE6.md`).
 
 **Ampliación de la Clase 5 (17 de noviembre, noche):** el gerente como llave foránea a `empleado` (decisión del profesor), el departamento visible al listar o buscar un empleado, la relación Empleado–Departamento guardada y recuperada (`actualizar_departamento`, `buscar_con_empleados`), y reportes con herencia y polimorfismo (`dominio/reporte.py`). la propiedad `departamento` con setter validado (Paso 5), `imprimir_reportes()` y las **semillas** (`persistencia/semillas.py`, opción 6 del menú principal). Pasaron **94/94 pruebas en SQLite** (Linux) y un recorrido contra MariaDB 10.11 (incluida la llave circular `gerente_id` y las semillas dos veces); **falta ejecutarlas en tu Windows**.
 
@@ -514,7 +514,7 @@ Una **semilla** es un conjunto de datos iniciales que se inserta para poder repe
 
 ### FLEX — Clase 6: Usuario, hash de contraseña y autenticación
 
-Una cuenta (`Usuario`) **se asocia** a un `Empleado`; no hereda de él. Autenticar es comprobar quién eres; autorizar (permisos por rol) queda para la próxima clase.
+Una cuenta (`Usuario`) **se asocia** a un `Empleado`; no hereda de él. Autenticar es comprobar quién eres; autorizar (permisos por rol) se implementó en la Clase 7 (ver sección de roles).
 
 | Capa | Archivo | Responsabilidad |
 |---|---|---|
@@ -801,7 +801,7 @@ python -m compileall -q src
 python -m unittest discover -s tests -v
 ```
 
-La versión actual contiene **161 pruebas**: 44 en `tests/test_ecotech.py`, 20 en `tests/test_crud.py`, 30 en `tests/test_clase5.py`, 36 en `tests/test_clase6.py`, 14 en `tests/test_idempotencia.py` y 17 en `tests/test_cuentas_crud.py`. En esta revisión se ejecutaron en conjunto en SQLite/Linux: **161/161 `OK`** (también con `pytest`), y la tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución local en Windows y la comprobación de esta versión contra MySQL/WampServer siguen pendientes. El README conserva el antecedente de una prueba previa con MariaDB 10.11; no se considera una validación de tu instalación WampServer.
+La versión actual contiene **209 pruebas** repartidas en 10 archivos de `tests/` (incluye las de validación de entradas, respaldo de la API y clima). En SQLite/Linux, `unittest discover` dio **209/209 `OK`** en la última ejecución. La tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución en Windows y la comprobación contra MySQL/WampServer de tu equipo siguen pendientes.
 
 Las pruebas cubren, entre otros aspectos:
 
@@ -965,7 +965,7 @@ En particular, conservar `docs/audt_diagr/ALCANCE_Y_AUDITORIA.md`, el UML final,
 
 7. **Semillas:** implementadas en `persistencia/semillas.py` (ver «Semillas» en la sección de la Clase 5). Falta que expliques el resultado al profesor y las pruebes en tu Windows y en MySQL/WampServer.
 8. **`@property departamento`:** implementada (Paso 5). Confirma con el profesor la forma de evitar el import circular.
-9. **Próxima clase (martes, según el profesor):** APIs y otros temas. Las dudas de la Clase 6 se consultan ese día.
+9. **Dudas para consultar con el profesor:** la Clase 6 y la Clase 7 (roles, API). Confirmar si `--demo` y `--listar` deben exigir login.
 10. **Restricciones UNIQUE** de `empleado.correo`, `departamento.nombre` y `proyecto.nombre`: pendiente de confirmar con el profesor. Hoy el programa lo evita antes de insertar (ver `docs/IDEMPOTENCIA_Y_DUPLICADOS.md`).
 11. **Permisos por rol:** hoy el administrador se reconoce por el nombre de cuenta `admin`. Los roles formales quedan para la clase siguiente.
 
