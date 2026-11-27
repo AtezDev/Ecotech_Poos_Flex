@@ -52,4 +52,4 @@ Pedido del estudiante: que todas las entradas del programa se validen y que ning
 
 **Decisión del estudiante:** cualquiera puede crear su propia cuenta y cargar semillas sin ser administrador. Esto no se cambió. Sí se conservan las restricciones por rol para menús, indicadores y administración.
 
-**Pendiente de decisión:** los accesos `--demo` y `--listar` de `main.py` funcionan sin iniciar sesión. Se dejaron como están hasta que el estudiante decida si deben pedir login de administrador.
+**Decisión tomada:** los accesos `--demo` y `--listar` de `main.py` funcionan sin iniciar sesión y se documentan como comandos de desarrollo (riesgos y uso permitido en `Readme.md`, sección de comandos). No se agrega login ni un rol `sys` por ahora.

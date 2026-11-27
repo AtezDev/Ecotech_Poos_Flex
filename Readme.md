@@ -777,6 +777,19 @@ python src/main.py --demo
 
 **Atención:** `--demo` realiza inserciones reales. Cada ejecución puede agregar registros de ejemplo. Úsalo únicamente en una base de práctica, no sobre datos importantes.
 
+#### Comandos de desarrollo: `--listar` y `--demo`
+
+Son comandos de desarrollo y prueba. Se decidió dejarlos **sin login**, a propósito y documentado:
+
+| Comando | Qué hace | Riesgo | Uso permitido |
+|---|---|---|---|
+| `--listar` | Muestra empleados sin pedir sesión | Expone datos personales (nombre, correo, salario) a quien tenga acceso a la consola | Solo en la base de práctica, en el propio equipo |
+| `--demo` | Inserta datos de ejemplo sin pedir sesión | Escribe registros reales en la base; no requiere cuenta | Solo en la base de práctica; es idempotente (no duplica) |
+
+No son parte del flujo de uso normal. El flujo normal es `python src/main.py`, que exige iniciar sesión antes del menú. Si el profesor pide que estos comandos exijan login de administrador, se agrega un chequeo con `exigir_admin` antes de ejecutarlos.
+
+**Registro abierto:** cualquier persona puede crear su propia cuenta desde el menú de acceso (opción 2). Debe indicar un ID de empleado que exista en la base, y la cuenta nueva recibe el rol `empleado`.
+
 ---
 
 ## 8. Pruebas automatizadas y errores que aprendimos a resolver
