@@ -7,7 +7,7 @@
 
 **Estado de GitHub comprobado al preparar esta carpeta:** rama `main`, último commit visible `03308d6` (*Actualizacion CRUD*, 17 de noviembre de 2026). El estudiante confirmó que las **44 pruebas originales terminaron en `OK` en Windows** y que el `push` de la fusión fue exitoso.
 
-**Clase 6 (19 de noviembre):** `Usuario`, `usuario_dao.py`, `servicios/autenticacion.py` (bcrypt), `menu_usuario.py` y login previo al menú principal. Cuenta `admin` creada desde la opción 3 con `ADMIN_PASSWORD` del `.env` (el nombre `admin` está reservado), sin duplicar semillas ni cuentas (`--demo` tampoco duplica). **161 pruebas OK** en la Clase 6 (SQLite); la suite actual tiene **209 pruebas OK**. Comprobado también en MariaDB 10.11 (ver `docs/VERIFICACION_UML_ORIGINAL.md` y `docs/VERIFICACION_GUIA_REPASO_CLASE6.md`).
+**Clase 6 (19 de noviembre):** `Usuario`, `usuario_dao.py`, `servicios/autenticacion.py` (bcrypt), `menu_usuario.py` y login previo al menú principal. Cuenta `admin` creada desde la opción 3 con `ADMIN_PASSWORD` del `.env` (el nombre `admin` está reservado), sin duplicar semillas ni cuentas (`--demo` tampoco duplica). **161 pruebas OK** en la Clase 6 (SQLite); la suite actual tiene **218 pruebas OK**. Comprobado también en MariaDB 10.11 (ver `docs/VERIFICACION_UML_ORIGINAL.md` y `docs/VERIFICACION_GUIA_REPASO_CLASE6.md`).
 
 **Ampliación de la Clase 5 (17 de noviembre, noche):** el gerente como llave foránea a `empleado` (decisión del profesor), el departamento visible al listar o buscar un empleado, la relación Empleado–Departamento guardada y recuperada (`actualizar_departamento`, `buscar_con_empleados`), y reportes con herencia y polimorfismo (`dominio/reporte.py`). la propiedad `departamento` con setter validado (Paso 5), `imprimir_reportes()` y las **semillas** (`persistencia/semillas.py`, opción 6 del menú principal). Pasaron **94/94 pruebas en SQLite** (Linux) y un recorrido contra MariaDB 10.11 (incluida la llave circular `gerente_id` y las semillas dos veces); **falta ejecutarlas en tu Windows**.
 
@@ -801,7 +801,7 @@ python -m compileall -q src
 python -m unittest discover -s tests -v
 ```
 
-La versión actual contiene **209 pruebas** repartidas en 10 archivos de `tests/` (incluye las de validación de entradas, respaldo de la API y clima). En SQLite/Linux, `unittest discover` dio **209/209 `OK`** en la última ejecución. La tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución en Windows y la comprobación contra MySQL/WampServer de tu equipo siguen pendientes.
+La versión actual contiene **218 pruebas** repartidas en 10 archivos de `tests/` (incluye las de validación de entradas, respaldo de la API y clima). En SQLite/Linux, `unittest discover` dio **218/218 `OK`** en la última ejecución. La tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución en Windows y la comprobación contra MySQL/WampServer de tu equipo siguen pendientes.
 
 Las pruebas cubren, entre otros aspectos:
 

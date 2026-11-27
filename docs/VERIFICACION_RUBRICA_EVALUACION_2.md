@@ -1,7 +1,7 @@
 # Verificación de criterios de la Evaluación 2 (Unidades 2 y 3)
 
 Cada criterio se relaciona con el archivo donde se implementa y con la prueba que lo verifica.
-Las pruebas se ejecutan con `python -m unittest discover -s tests -p "test_*.py"` (201 pruebas).
+Las pruebas se ejecutan con `python -m unittest discover -s tests -p "test_*.py"` (218 pruebas).
 
 | Criterio | Implementación | Prueba o verificación | Estado |
 |---|---|---|---|

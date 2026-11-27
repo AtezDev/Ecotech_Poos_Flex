@@ -29,7 +29,7 @@ Regla de la guía (sección 12): sembrar dos veces debe conservar los registros 
 ## Cómo se verificó
 
 - (Histórico, Clase 6) `unittest discover`: 161 OK (130 anteriores + 14 de `tests/test_idempotencia.py` + 17 de `tests/test_cuentas_crud.py`).
-- (Histórico, Clase 6) `pytest`: 161 passed. Suite actual: 209 pruebas.
+- (Histórico, Clase 6) `pytest`: 161 passed. Suite actual: 218 pruebas.
 - Escenarios repetidos en SQLite y MariaDB 10.11: conteos estables tras 3 cargas de semillas y 2 de `--demo`; rechazos de correo, departamento y proyecto repetidos.
 
 ## Preguntas para el profesor

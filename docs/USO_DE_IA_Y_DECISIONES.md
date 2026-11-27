@@ -19,7 +19,10 @@ Las pruebas de la API real se hicieron en el computador del estudiante, porque e
 | 24-nov | Consumo de la API de indicadores con `requests`, `timeout=(3, 5)` y `raise_for_status()` | Aceptada | Pruebas con JSON ficticio OK |
 | 24-nov | Tabla `indicador` con clave `(codigo, fecha)` para no duplicar datos | Aceptada | Prueba de guardar dos veces: una sola fila |
 | 24-nov | Respaldo local cuando la API falla | Aceptada | Pruebas con fallas simuladas OK |
-| 25-nov | Menú del empleado con solo ficha, indicadores y cuenta | Propuesta. **Pendiente de confirmar por el estudiante** | Implementada tal como se propuso |
+| 25-nov | Menú del empleado con ficha, indicadores y cuenta | Aceptada | Implementada |
+| 27-nov | Opción «Modificar mis datos» para el empleado: dirección, teléfono y correo (nombre, salario, fecha e ID no se cambian) | Pedida por el estudiante | Implementada con validadores y pruebas (`test_mis_datos.py`) |
+| 27-nov | Verificar correo repetido al modificar datos, en el admin y en el empleado | Aceptada | Pruebas 07 y 08 de `test_mis_datos.py` |
+| 27-nov | Ocultar el detalle técnico de errores al arrancar la base de datos | Aceptada | `test_errores_seguros.py` |
 | 26-nov | Módulo de clima con Open-Meteo (sin clave) | Aceptada | Funciona en el computador del estudiante |
 | 26-nov | Adaptador de la API ajustado al formato real (`data.uf`, `data.dolar`, `data.euro`) | Aceptada tras la prueba real del estudiante | UF, dólar y euro guardados y consultados |
 | 26-nov | Agregar dólar y euro (tipo de cambio) | Aceptada | Pruebas OK y consulta real OK |
@@ -30,8 +33,18 @@ Las pruebas de la API real se hicieron en el computador del estudiante, porque e
 - **Contraseñas.** Se guardan con bcrypt. Criterio: no guardar contraseñas en texto plano.
 - **Mensajes de error.** No muestran trazas técnicas ni rutas. Criterio: no exponer información sensible al usuario.
 
+## 3b. Fragmentos apoyados por IA y decisión tomada
+
+| Fragmento | Origen | Decisión | Criterio técnico |
+|---|---|---|---|
+| `src/servicios/api_indicadores.py` (consulta y extracción) | Propuesta del asistente, con el formato del ejemplo de la diapositiva | Modificado | La respuesta real de la API tiene otra forma (`status` y `data`); se detectó en la prueba real |
+| `src/servicios/api_clima.py` (Open-Meteo) | Propuesta del asistente | Aceptado tras prueba real | Sin clave, con latitud y longitud validadas |
+| `src/servicios/permisos.py` (`exigir_sesion`, `exigir_admin`) | Propuesta del asistente | Aceptado | Dos niveles de control de acceso |
+| `src/presentacion/menu_clima.py` (`solicitar_numero`) | Propuesta del asistente | Aceptado y reforzado | Rechaza vacío, texto, `nan`, `inf` y valores fuera de rango |
+| Respaldo local de la API (`servicios/indicadores.py`, `servicios/clima.py`) | Propuesta del asistente | Aceptado | Muestra el último dato guardado; no consulta otra API |
+
 ## 4. Pendientes que el estudiante debe revisar
-- Confirmar la restricción del menú del empleado (fila de la tabla).
+- Confirmar con el profesor que el empleado puede modificar su dirección, teléfono y correo, y que nombre, salario, fecha de contrato e ID no se modifican.
 - Confirmar que la modalidad de trabajo es individual (ver `docs/INSTRUCCIONES_ENTREGA.md`).
 - Ejecutar las pruebas en el computador antes de subir la entrega.
 
@@ -71,7 +84,7 @@ Este trabajo fue hecho en colaboración. Ninguna herramienta trabajó sola, y la
 - Integración de la API de indicadores (UF, dólar, euro) y de la API de clima.
 - Respaldo local cuando la API falla.
 - Validación de entradas y manejo de errores.
-- Pruebas automatizadas (209 en la suite actual).
+- Pruebas automatizadas (218 en la suite actual).
 - Documentación de verificación (`docs/VERIFICACION_UML_ORIGINAL.md`).
 
 **Lo que ChatGPT y Claude no hicieron:**
