@@ -12,7 +12,7 @@ Las pruebas de la API real se hicieron en el computador del estudiante, porque e
 
 El estudiante mantuvo la responsabilidad de coordinar el trabajo entre herramientas, revisar las propuestas, decidir qué incorporar y comprobar los cambios en su entorno. Que una respuesta haya sido propuesta por una IA no la hace correcta por sí sola.
 
-En la Unidad 3, el flujo fue este: el asistente propuso los cambios y las pruebas; el estudiante los copió al proyecto, ejecutó las pruebas y el programa en su computador, reportó los resultados y pidió correcciones cuando algo no funcionó. Los commits y los `push` a GitHub fueron ejecutados por el asistente, a pedido y con autorización del estudiante, y revisados por él antes de subirlos.
+En la Unidad 3, el flujo fue este: el asistente propuso los cambios y las pruebas; el estudiante los copió al proyecto, ejecutó las pruebas y el programa en su computador, reportó los resultados y pidió correcciones cuando algo no funcionó. Los commits y los `push` a GitHub del proyecto fueron realizados por el estudiante. En la última etapa (27 de noviembre), el asistente ejecutó algunos de ellos a pedido del estudiante y con su autorización, y el estudiante los revisó antes de subirlos.
 
 ## 2. Apoyo de ChatGPT durante el aprendizaje y desarrollo
 
