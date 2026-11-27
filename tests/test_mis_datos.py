@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / 'src'))
 from persistencia.creacion_bd import crear_tablas
 from persistencia.empleado_dao import EmpleadoDAO
 from persistencia.semillas import asegurar_admin_inicial, cargar_semillas
+from presentacion.menu_empleado import actualizar_empleado
 from presentacion.menu_principal import modificar_mis_datos
 from servicios.autenticacion import autenticar, crear_cuenta
 
@@ -78,6 +79,21 @@ class TestModificarMisDatos(unittest.TestCase):
     def test_06_opcion_invalida_pide_de_nuevo(self):
         salida = ejecutar(self.ana, ['9', '0'])
         self.assertIn('Elige una opción entre 0 y 3', salida)
+
+    def test_07_admin_no_guarda_correo_repetido(self):
+        otro = EmpleadoDAO.buscar_por_id(1)
+        salida = io.StringIO()
+        with mock.patch('builtins.input', side_effect=['2', otro.correoElectronico]), \
+                contextlib.redirect_stdout(salida):
+            actualizar_empleado()
+        self.assertIn('Ese correo ya pertenece a otro empleado', salida.getvalue())
+        self.assertEqual(EmpleadoDAO.buscar_por_id(2).correoElectronico, self.original.correoElectronico)
+
+    def test_08_empleado_no_guarda_correo_repetido_de_otra_ficha(self):
+        otro = EmpleadoDAO.buscar_por_id(1)
+        salida = ejecutar(self.ana, ['3', otro.correoElectronico, '0'])
+        self.assertIn('Ese correo ya está registrado en otra ficha', salida)
+        self.assertEqual(EmpleadoDAO.buscar_por_id(2).correoElectronico, self.original.correoElectronico)
 
 
 if __name__ == '__main__':
