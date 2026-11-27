@@ -801,7 +801,7 @@ python -m compileall -q src
 python -m unittest discover -s tests -v
 ```
 
-La versión actual contiene **218 pruebas** repartidas en 10 archivos de `tests/` (incluye las de validación de entradas, respaldo de la API y clima). En SQLite/Linux, `unittest discover` dio **218/218 `OK`** en la última ejecución. La tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución en Windows y la comprobación contra MySQL/WampServer de tu equipo siguen pendientes.
+La versión actual contiene **218 pruebas** repartidas en 12 archivos de `tests/` (incluye las de validación de entradas, respaldo de la API y clima). En SQLite/Linux, `unittest discover` dio **218/218 `OK`** en la última ejecución. La tabla `usuario` con registro y login se probó además contra MariaDB 10.11. Las pruebas del menú usan `COMANDO_MENU` para abrir `menu_principal()` sin pasar por el login. La ejecución en Windows y la comprobación contra MySQL/WampServer de tu equipo siguen pendientes.
 
 Las pruebas cubren, entre otros aspectos:
 
@@ -953,13 +953,16 @@ En particular, conservar `docs/audt_diagr/ALCANCE_Y_AUDITORIA.md`, el UML final,
 - CRUD de Departamento, Proyecto y RegistroTiempo, y asignación/cambio de proyecto y de departamento.
 - Pruebas automáticas de persistencia, validación y restricciones.
 - Documentos y versiones anteriores de los diagramas conservados en `docs/`.
+- Roles `admin` y `empleado`, con permisos por rol (Clase 7).
+- API de indicadores (UF, dólar, euro) con respaldo local, y API de clima (Open-Meteo) con respaldo.
+- Modificación de dirección, teléfono y correo por el propio empleado («Modificar mis datos»), con validación de entradas.
 
 ### Pendiente o no comprobado todavía
 
 1. **Fecha de contrato del empleado:** no se puede cambiar por menú, porque el UML no define `cambiarFechaInicioContrato`.
 2. **Estado «terminado» de un proyecto:** el UML no lo define (ver «Decisión pendiente» en la sección 4).
 3. **Métodos del UML en las clases de dominio:** `crearDepartamento`, `modificarDepartamento`, `buscarDepartamento`, `eliminarDepartamento`, `crearProyecto`, `modificarProyecto` y `eliminarProyecto` siguen sin existir como métodos; su función la cumplen el DAO y los menús.
-4. **Otras clases del UML:** `Informe`, `CuentaUsuario` y `ControlAcceso`, con sus comportamientos y validaciones, cuando corresponda al curso.
+4. **Otras clases del UML:** `CuentaUsuario` está implementada como `Usuario`; `ControlAcceso` está distribuida entre `servicios/autenticacion.py` y `servicios/permisos.py`; `Informe` está parcial (reportes de empleados y de departamento; faltan los de proyectos y registro de tiempo). Ver `docs/VERIFICACION_UML_ORIGINAL.md`.
 5. **Prueba real en MySQL/WampServer:** apertura de conexión, creación del esquema, `INSERT`/`SELECT`, relaciones, errores de integridad y operaciones CRUD. No se afirma que esté realizada.
 6. **Publicación de la ampliación:** las 44 pruebas originales en Windows y la fusión de Git ya fueron confirmadas por el estudiante; la rama `main` se verificó en el commit `03308d6`. **La Clase 5 todavía requiere ejecutar las 94 pruebas en Windows, copiarse y publicarse** mediante los comandos de la sección 9. Se debe comprobar el resultado final de ese push.
 
@@ -967,7 +970,7 @@ En particular, conservar `docs/audt_diagr/ALCANCE_Y_AUDITORIA.md`, el UML final,
 8. **`@property departamento`:** implementada (Paso 5). Confirma con el profesor la forma de evitar el import circular.
 9. **Dudas para consultar con el profesor:** la Clase 6 y la Clase 7 (roles, API). Confirmar si `--demo` y `--listar` deben exigir login.
 10. **Restricciones UNIQUE** de `empleado.correo`, `departamento.nombre` y `proyecto.nombre`: pendiente de confirmar con el profesor. Hoy el programa lo evita antes de insertar (ver `docs/IDEMPOTENCIA_Y_DUPLICADOS.md`).
-11. **Permisos por rol:** hoy el administrador se reconoce por el nombre de cuenta `admin`. Los roles formales quedan para la clase siguiente.
+11. **Permisos por rol:** implementados en la Clase 7 (`admin` y `empleado`, columna `usuario.rol`).
 
 ### Criterio para los próximos avances
 

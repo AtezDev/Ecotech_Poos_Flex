@@ -1,6 +1,6 @@
 # Uso de herramientas de IA y decisiones técnicas
 
-Este documento registra el proceso de trabajo con el asistente de IA (Claude) en la Unidad 3 (clima, indicadores y roles).
+Este documento registra el proceso de trabajo con las herramientas de IA: ChatGPT en etapas anteriores del proyecto y Claude en la Unidad 3 (clima, indicadores y roles). Ver también la sección 8.
 Quien toma las decisiones es el estudiante: cada cambio se propuso, se probó en su computador y se aceptó o se descartó.
 Las pruebas de la API real se hicieron en el computador del estudiante, porque el entorno del asistente no tenía acceso a la API.
 

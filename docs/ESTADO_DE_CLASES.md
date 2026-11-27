@@ -10,8 +10,8 @@
 - **FLEX Clase 5 (17-nov-2026):** referencia y colección Empleado–Departamento, FK guardada y recuperada (`actualizar_departamento`, `buscar_con_empleados`), reportes con herencia y polimorfismo, gerente como FK a empleado (opcional) y departamento visible al listar empleados. Semillas sin duplicados (`persistencia/semillas.py`) y propiedad `departamento` validada (Paso 5). **Pendiente:** explicar y probar en Windows/MySQL. Usuario e inicio de sesión se implementaron en la Clase 6.
 - **FLEX Clase 6 (19-nov-2026):** `Usuario` asociado a `Empleado`, tabla `usuario`, hash bcrypt, `servicios/autenticacion.py`, menú de acceso con 3 intentos y login antes del menú principal. 130/130 pruebas en SQLite y sondeo en MariaDB. **Pendiente:** Windows/WampServer. Los permisos por rol se implementaron en la Clase 7. Ver `VERIFICACION_GUIA_REPASO_CLASE6.md`.
 - **Conservado:** relación Empleado–Proyecto N:M, tabla puente y FK compuesta de RegistroTiempo.
-- **Pendiente:** los comportamientos avanzados del UML y las clases Informe, CuentaUsuario y ControlAcceso, y métodos del UML como `crearDepartamento` o `eliminarProyecto`, que hoy cubren el DAO y el menú.
+- **Pendiente (actualizado 27-nov):** `Informe` parcial (faltan proyectos y registro de tiempo). `CuentaUsuario` está implementada como `Usuario`; `ControlAcceso` está distribuida en `autenticacion.py` y `permisos.py`. Métodos como `crearDepartamento` o `eliminarProyecto` cubren el DAO y el menú.
 - **Pruebas:** SQLite temporal; ejecutar también en Windows y posteriormente en MySQL/WampServer.
-- **Sin cambios en GitHub:** este paquete es una carpeta de estudio independiente.
+- **Repositorio:** la versión entregada está en la rama `main` de GitHub.
 
 - **Verificación de la carpeta v5 (19-nov-2026):** 94/94 pruebas ejecutadas en SQLite/Linux, individualmente y en conjunto. Windows y MySQL/WampServer quedan por validar. La PPT/PDF oficial de Clase 5 no está incluida en los materiales recibidos; la guía PDF añadida es una guía complementaria, no material oficial del profesor.
