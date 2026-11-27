@@ -159,7 +159,8 @@ class TestCuentasCrud(unittest.TestCase):
         salida = io.StringIO()
         with mock.patch('builtins.input', side_effect=['0']), contextlib.redirect_stdout(salida):
             menu_principal(self.ana)
-        self.assertIn('3. Mi cuenta', salida.getvalue())
+        self.assertIn('2. Modificar mis datos', salida.getvalue())
+        self.assertIn('4. Mi cuenta', salida.getvalue())
         self.assertNotIn('Administrar usuarios', salida.getvalue())
         salida = io.StringIO()
         with mock.patch('builtins.input', side_effect=['0']), contextlib.redirect_stdout(salida):

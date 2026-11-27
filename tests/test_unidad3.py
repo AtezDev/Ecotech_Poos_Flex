@@ -213,7 +213,7 @@ class TestUnidad3(unittest.TestCase):
 
     # Menús según rol
     def test_17_menu_empleado_ficha_y_sin_actualizar(self):
-        salida = ejecutar(lambda: menu_principal(self.luis), ['1', '2', '2', '0', '0'])
+        salida = ejecutar(lambda: menu_principal(self.luis), ['1', '3', '2', '0', '0'])
         self.assertIn('Luis Soto', salida)
         self.assertIn('Acción solo para administrador.', salida)
         self.assertNotIn('Administrar usuarios', salida)

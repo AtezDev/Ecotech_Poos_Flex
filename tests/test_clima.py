@@ -102,7 +102,7 @@ class TestClima(unittest.TestCase):
 
     def test_08_menu_empleado_consulta_clima_con_respaldo_vacio(self):
         salida = io.StringIO()
-        entradas = ['2', '3', 'La Serena', '-29.9', '-71.2', '0', '0']
+        entradas = ['3', '3', 'La Serena', '-29.9', '-71.2', '0', '0']
         with mock.patch('builtins.input', side_effect=entradas), \
                 mock.patch('servicios.clima.consultar_api_clima',
                            side_effect=requests.ConnectionError('sin red')), \

@@ -543,12 +543,12 @@ Una cuenta (`Usuario`) **se asocia** a un `Empleado`; no hereda de él. Autentic
 - **Roles:** `Usuario` tiene `rol` (`admin` o `empleado`; por defecto `empleado`). El administrador inicial se crea con rol `admin`.
 - **Migración:** una base creada en la Unidad 2 recibe la columna `rol` al ejecutar `python src/main.py`; la cuenta `admin` queda con rol admin. No hace falta borrar la base.
 - **Permisos:** `servicios/permisos.py` (`exigir_sesion`, `exigir_admin`). La administración depende del rol, no del nombre.
-- **Menús:** el administrador ve todas sus opciones y «9. Indicadores económicos». El empleado ve «1. Mi ficha», «2. Indicadores económicos» (solo consulta) y «3. Mi cuenta».
+- **Menús:** el administrador ve todas sus opciones y «9. Indicadores económicos». El empleado ve «1. Mi ficha», «2. Modificar mis datos», «3. Indicadores económicos» (solo consulta) y «4. Mi cuenta». En «Modificar mis datos» el empleado cambia su **dirección, teléfono y correo**; cada dato pasa por su validador (`Empleado.validar_direccion`, `validar_telefono`, `validar_correo`), y el correo no puede repetirse en otra ficha. El nombre, el salario, la fecha de contrato y el ID no los cambia el empleado.
 - **API de indicadores:** `servicios/api_indicadores.py` consulta `https://api.boostr.cl/economy/indicators.json` con `timeout=(3, 5)`, usa `raise_for_status()` y convierte el JSON en `Indicador` con `extraer_primero()`.
 - **Persistencia:** tabla `indicador` con clave `(codigo, fecha)`: una sola fila por código y fecha; guardar de nuevo actualiza el valor.
 - **Respaldo:** si la API falla, `actualizar_uf` muestra el último dato guardado (origen «respaldo»); si no hay ninguno, informa que no hay información disponible. Solo se informa «API» después del commit.
 - **Pruebas:** `tests/test_unidad3.py` usa JSON ficticio y fallas simuladas (`mock`); no consulta la API real.
-- **Clima:** `servicios/api_clima.py` consulta `https://api.open-meteo.com/v1/forecast` (sin clave) con latitud y longitud validadas. Muestra temperatura, humedad y estado del tiempo. Está en «Indicadores económicos», opción 3. Guarda cada dato en la tabla `clima` y, si la API falla, muestra el último dato guardado de esa ciudad.
+- **Clima:** `servicios/api_clima.py` consulta `https://api.open-meteo.com/v1/forecast` (sin clave) con latitud y longitud validadas. Muestra temperatura, humedad y estado del tiempo. Está en «Indicadores económicos» (opción 3 del empleado; opción 9 del admin). Guarda cada dato en la tabla `clima` y, si la API falla, muestra el último dato guardado de esa ciudad.
 - **Documentación de IA:** `docs/USO_DE_IA_Y_DECISIONES.md` (uso de IA y criterios) e `docs/INSTRUCCIONES_ENTREGA.md` (pasos para entregar) y `docs/DEFENSA_INDIVIDUAL.md` (preparación de la defensa).
 
 **Indicadores:** UF, dólar y euro se consultan desde la misma API (`data.uf`, `data.dolar`, `data.euro`).
