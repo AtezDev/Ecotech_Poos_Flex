@@ -33,4 +33,4 @@ No se aceptan entregas por correo. Después de la entrega viene la defensa indiv
 2. Sube el ZIP a AAI antes de las 23:00 del viernes. No esperes al último minuto.
 
 ## Nota sobre la modalidad
-Modalidad confirmada con el profesor: **trabajo individual**. La guía permitía elegir entre individual y grupal.
+Modalidad: **trabajo individual**. La guía permitía elegir entre individual y grupal; el estudiante eligió individual desde el inicio, y el profesor lo confirmó.
